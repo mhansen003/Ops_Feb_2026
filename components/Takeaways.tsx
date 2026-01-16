@@ -8,6 +8,49 @@ interface TakeawaysProps {
 }
 
 export default function Takeaways({ tickets, stats }: TakeawaysProps) {
+  // Calculate real insights from data
+  const today = new Date();
+
+  // Overdue tickets
+  const overdueTickets = tickets.filter(t => new Date(t.targetDate) < today);
+
+  // Blocked tickets
+  const blockedTickets = tickets.filter(t => t.status === 'Blocked');
+
+  // High priority items (Critical + High)
+  const highPriorityCount = (stats.byPriority.Critical || 0) + (stats.byPriority.High || 0);
+
+  // Team capacity metrics
+  const uniqueAssignees = new Set(tickets.map(t => t.assignee).filter(a => a !== 'Unassigned')).size;
+  const avgTicketsPerPerson = uniqueAssignees > 0 ? Math.round(tickets.length / uniqueAssignees) : 0;
+
+  // Calculate on-track percentage
+  const completedCount = stats.byStatus.Completed || 0;
+  const inProgressCount = stats.byStatus['In Progress'] || 0;
+  const readyForReviewCount = stats.byStatus['Ready for Review'] || 0;
+  const onTrackCount = inProgressCount + readyForReviewCount + completedCount;
+  const onTrackPercentage = stats.total > 0 ? Math.round((onTrackCount / stats.total) * 100) : 0;
+
+  // Security items analysis
+  const securityCount = stats.byCategory?.Security || 0;
+  const securityInProgress = tickets.filter(t => t.category === 'Security' && t.status === 'In Progress').length;
+  const securityCritical = tickets.filter(t => t.category === 'Security' && (t.priority === 'Critical' || t.priority === 'High')).length;
+
+  // Get upcoming deadlines grouped by timeframe
+  const getUpcomingTickets = (daysStart: number, daysEnd: number) => {
+    return tickets.filter(t => {
+      const dueDate = new Date(t.targetDate);
+      const daysUntil = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      return daysUntil >= daysStart && daysUntil <= daysEnd;
+    }).sort((a, b) => {
+      // Sort by priority first, then by date
+      const priorityOrder = { 'Critical': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+      const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] ?? 4;
+      const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] ?? 4;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime();
+    });
+  };
 
   const keyTakeaways = [
     {
@@ -16,9 +59,9 @@ export default function Takeaways({ tickets, stats }: TakeawaysProps) {
       color: 'from-purple-500 to-pink-500',
       description: 'Security initiatives represent a significant portion of our backlog, demonstrating commitment to compliance and risk mitigation.',
       metrics: [
-        { label: 'Security Tickets', value: stats.byCategory.Security },
-        { label: 'Critical Security', value: '3' },
-        { label: 'Completion Rate', value: '45%' }
+        { label: 'Security Tickets', value: String(securityCount) },
+        { label: 'High Priority Security', value: String(securityCritical) },
+        { label: 'In Progress', value: String(securityInProgress) }
       ]
     },
     {
@@ -27,9 +70,9 @@ export default function Takeaways({ tickets, stats }: TakeawaysProps) {
       color: 'from-blue-500 to-cyan-500',
       description: 'Ongoing infrastructure improvements position us for better scalability and reliability.',
       metrics: [
-        { label: 'Infrastructure Items', value: stats.byCategory.Infrastructure },
-        { label: 'Auto-scaling Ready', value: 'Q1' },
-        { label: 'Cost Optimization', value: '15%' }
+        { label: 'Infrastructure Items', value: String(stats.byCategory.Infrastructure || 0) },
+        { label: 'In Progress', value: String(tickets.filter(t => t.category === 'Infrastructure' && t.status === 'In Progress').length) },
+        { label: 'Team Members', value: String(uniqueAssignees) }
       ]
     },
     {
@@ -38,69 +81,121 @@ export default function Takeaways({ tickets, stats }: TakeawaysProps) {
       color: 'from-amber-500 to-orange-500',
       description: 'Database and system optimizations will significantly improve user experience and reduce operational costs.',
       metrics: [
-        { label: 'Performance Tickets', value: stats.byCategory.Performance },
-        { label: 'Expected Improvement', value: '60%' },
-        { label: 'Systems Impacted', value: '12+' }
+        { label: 'Performance Tickets', value: String(stats.byCategory.Performance || 0) },
+        { label: 'Feature Requests', value: String(stats.byCategory.Feature || 0) },
+        { label: 'Bug Fixes', value: String(stats.byCategory['Bug Fix'] || 0) }
       ]
     }
   ];
+
+  // Build next steps timeline from real data
+  const week1Tickets = getUpcomingTickets(0, 7);
+  const week2Tickets = getUpcomingTickets(8, 14);
+  const week3Tickets = getUpcomingTickets(15, 28);
+
+  // Include overdue items in week 1
+  const urgentTickets = [...overdueTickets, ...week1Tickets.filter(t => t.priority === 'Critical' || t.priority === 'High')].slice(0, 4);
+
+  const mapStatusToDisplay = (status: string, isOverdue: boolean) => {
+    if (isOverdue) return 'urgent';
+    if (status === 'In Progress') return 'in-progress';
+    if (status === 'Ready for Review') return 'review';
+    if (status === 'Blocked') return 'urgent';
+    return 'planned';
+  };
 
   const nextSteps = [
     {
-      phase: 'Week 1 (Feb 3-7)',
-      priority: 'Critical',
+      phase: 'Week 1 (Immediate)',
+      priority: 'Critical' as const,
       color: 'border-rose-500',
-      actions: [
-        { task: 'Unblock CI/CD Pipeline Optimization (OPS-2407)', owner: 'Michael Brown', status: 'urgent' },
-        { task: 'Complete Database Performance work (OPS-2401)', owner: 'Sarah Chen', status: 'in-progress' },
-        { task: 'Deploy Multi-Factor Authentication (OPS-2402)', owner: 'Marcus Johnson', status: 'review' },
-        { task: 'Resource allocation review meeting', owner: 'Leadership', status: 'scheduled' }
+      actions: urgentTickets.length > 0 ? urgentTickets.map(t => {
+        const isOverdue = new Date(t.targetDate) < today;
+        return {
+          task: `${t.id}: ${t.title.substring(0, 60)}${t.title.length > 60 ? '...' : ''}`,
+          owner: t.assignee,
+          status: mapStatusToDisplay(t.status, isOverdue)
+        };
+      }) : [
+        { task: 'No urgent items this week', owner: 'Team', status: 'planned' as const }
       ]
     },
     {
-      phase: 'Week 2 (Feb 10-14)',
-      priority: 'High',
+      phase: 'Week 2 (Next 7-14 days)',
+      priority: 'High' as const,
       color: 'border-amber-500',
-      actions: [
-        { task: 'Complete Security Audit Remediation (OPS-2409)', owner: 'Robert Kim', status: 'in-progress' },
-        { task: 'Deploy Container Orchestration Upgrade (OPS-2414)', owner: 'Patricia Moore', status: 'planned' },
-        { task: 'Certificate Management Automation (OPS-2413)', owner: 'Kevin Zhang', status: 'in-progress' },
-        { task: 'Mid-month progress review with stakeholders', owner: 'Leadership', status: 'scheduled' }
+      actions: week2Tickets.slice(0, 4).length > 0 ? week2Tickets.slice(0, 4).map(t => ({
+        task: `${t.id}: ${t.title.substring(0, 60)}${t.title.length > 60 ? '...' : ''}`,
+        owner: t.assignee,
+        status: mapStatusToDisplay(t.status, false)
+      })) : [
+        { task: 'No scheduled items for this period', owner: 'Team', status: 'planned' as const }
       ]
     },
     {
-      phase: 'Week 3-4 (Feb 17-28)',
-      priority: 'Medium',
+      phase: 'Week 3-4 (15-28 days)',
+      priority: 'Medium' as const,
       color: 'border-blue-500',
-      actions: [
-        { task: 'Backup Recovery Testing (OPS-2404)', owner: 'David Martinez', status: 'planned' },
-        { task: 'Load Balancer Configuration Review (OPS-2411)', owner: 'Chris Lee', status: 'planned' },
-        { task: 'Log Aggregation System Upgrade (OPS-2412)', owner: 'Nancy Wilson', status: 'review' },
-        { task: 'Month-end demos and executive summary', owner: 'Leadership', status: 'scheduled' }
+      actions: week3Tickets.slice(0, 4).length > 0 ? week3Tickets.slice(0, 4).map(t => ({
+        task: `${t.id}: ${t.title.substring(0, 60)}${t.title.length > 60 ? '...' : ''}`,
+        owner: t.assignee,
+        status: mapStatusToDisplay(t.status, false)
+      })) : [
+        { task: 'No scheduled items for this period', owner: 'Team', status: 'planned' as const }
       ]
     }
   ];
 
-  const risks = [
-    {
-      risk: 'Blocked CI/CD Pipeline',
-      impact: 'High',
-      mitigation: 'Immediate escalation and resource allocation. Target resolution by Feb 5.',
+  // Build risk assessment from real data
+  const risks = [];
+
+  if (blockedTickets.length > 0) {
+    risks.push({
+      risk: `${blockedTickets.length} Blocked Item${blockedTickets.length > 1 ? 's' : ''} Preventing Progress`,
+      impact: blockedTickets.length >= 3 ? 'High' as const : 'Medium' as const,
+      mitigation: `Immediate escalation required. Top blocked items: ${blockedTickets.slice(0, 2).map(t => t.id).join(', ')}. Schedule blocker resolution meeting within 48 hours.`,
       owner: 'Engineering Leadership'
-    },
-    {
-      risk: 'Multiple Critical Items with Feb Deadlines',
-      impact: 'Medium',
-      mitigation: 'Daily standups for critical items. Consider extending 1-2 lower-priority items to March.',
+    });
+  }
+
+  if (overdueTickets.length > 0) {
+    risks.push({
+      risk: `${overdueTickets.length} Overdue Item${overdueTickets.length > 1 ? 's' : ''} Past Target Date`,
+      impact: overdueTickets.length >= 5 ? 'High' as const : 'Medium' as const,
+      mitigation: overdueTickets.length >= 5
+        ? `Critical: ${overdueTickets.length} overdue items. Recommend daily standup focused on clearing backlog. Consider resource reallocation.`
+        : `Review ${overdueTickets.length} overdue item(s). Adjust timelines or prioritize completion.`,
       owner: 'Project Management'
-    },
-    {
-      risk: 'Team Capacity Constraints',
-      impact: 'Medium',
-      mitigation: 'Evaluate contractor support for infrastructure tasks. Defer documentation to March.',
+    });
+  }
+
+  if (avgTicketsPerPerson > 15) {
+    risks.push({
+      risk: 'Team Capacity at High Utilization',
+      impact: 'Medium' as const,
+      mitigation: `Team averaging ${avgTicketsPerPerson} tickets/person. Evaluate contractor support. Consider deferring lower priority work.`,
       owner: 'Resource Planning'
-    }
-  ];
+    });
+  }
+
+  if (securityCritical > 0 && securityInProgress < securityCritical) {
+    risks.push({
+      risk: `${securityCritical} High Priority Security Items Need Attention`,
+      impact: 'High' as const,
+      mitigation: `Security items require immediate focus. Only ${securityInProgress} currently in progress. Ensure compliance deadlines are met.`,
+      owner: 'Security Team'
+    });
+  }
+
+  // Add placeholder if no risks
+  if (risks.length === 0) {
+    risks.push({
+      risk: 'No Major Risks Identified',
+      impact: 'Low' as const,
+      mitigation: 'Team is on track with no critical blockers. Continue monitoring for emerging risks and maintain clear communication.',
+      owner: 'Project Management'
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -112,17 +207,32 @@ export default function Takeaways({ tickets, stats }: TakeawaysProps) {
         </div>
         <div className="prose prose-invert max-w-none">
           <p className="text-lg text-gray-300 leading-relaxed">
-            The Operations team is executing a balanced February sprint focused on <strong className="text-white">security
-            compliance</strong>, <strong className="text-white">infrastructure modernization</strong>, and{' '}
-            <strong className="text-white">performance optimization</strong>. With {stats.total} total items in backlog,{' '}
-            {stats.byPriority.Critical} critical priorities are being actively managed. Current risk level is{' '}
-            <strong className="text-amber-400">Medium-High</strong> due to {stats.byStatus.Blocked} blocked item(s) requiring
-            immediate attention.
+            The Operations team is managing {stats.total} active items across {Object.keys(stats.byProject || {}).length} projects,
+            focused on <strong className="text-white">security compliance</strong> ({securityCount} items),{' '}
+            <strong className="text-white">infrastructure modernization</strong> ({stats.byCategory.Infrastructure || 0} items), and{' '}
+            <strong className="text-white">feature development</strong> ({stats.byCategory.Feature || 0} items).{' '}
+            {highPriorityCount > 0 && `${highPriorityCount} high-priority items are being actively managed. `}
+            Current risk level is{' '}
+            <strong className={
+              overdueTickets.length + blockedTickets.length > 10 ? 'text-rose-400' :
+              overdueTickets.length + blockedTickets.length > 5 ? 'text-amber-400' :
+              'text-teal-400'
+            }>
+              {overdueTickets.length + blockedTickets.length > 10 ? 'High' :
+               overdueTickets.length + blockedTickets.length > 5 ? 'Medium' :
+               'Low'}
+            </strong>{' '}
+            {overdueTickets.length > 0 && `with ${overdueTickets.length} overdue item(s) `}
+            {blockedTickets.length > 0 && `and ${blockedTickets.length} blocked item(s) `}
+            requiring immediate attention.
           </p>
           <p className="text-gray-300 leading-relaxed">
-            Team velocity is <strong className="text-teal-400">on track</strong> with {stats.byStatus['In Progress']} items
-            in progress and {stats.byStatus['Ready for Review']} ready for review. Key wins expected this month include
-            MFA deployment, 60% database performance improvement, and cost-optimized auto-scaling implementation.
+            Team velocity is <strong className={onTrackPercentage >= 70 ? 'text-teal-400' : 'text-amber-400'}>
+              {onTrackPercentage >= 70 ? 'on track' : 'moderate'}
+            </strong> with {inProgressCount} items in progress and {readyForReviewCount} ready for review.{' '}
+            {uniqueAssignees} team members are actively engaged, averaging {avgTicketsPerPerson} tickets per person.{' '}
+            {stats.byCategory.Feature && stats.byCategory.Feature > 0 && `${stats.byCategory.Feature} feature requests and `}
+            {stats.byCategory['Bug Fix'] && stats.byCategory['Bug Fix'] > 0 && `${stats.byCategory['Bug Fix']} bug fixes are in the current sprint.`}
           </p>
         </div>
       </div>
@@ -235,31 +345,48 @@ export default function Takeaways({ tickets, stats }: TakeawaysProps) {
           <span>💡</span> Leadership Recommendations
         </h3>
         <div className="space-y-4">
-          <RecommendationItem
-            priority="Immediate"
-            color="text-rose-400"
-            text="Unblock CI/CD pipeline (OPS-2407) - assign dedicated resources by Feb 5"
-          />
-          <RecommendationItem
-            priority="This Week"
-            color="text-amber-400"
-            text="Conduct resource allocation review - team capacity at 95% with critical items pending"
-          />
-          <RecommendationItem
-            priority="Mid-Month"
-            color="text-blue-400"
-            text="Schedule stakeholder demo for completed security and performance improvements"
-          />
-          <RecommendationItem
-            priority="Month-End"
-            color="text-teal-400"
-            text="Prepare executive summary quantifying: security posture improvement, performance gains (60% faster dashboards), and infrastructure cost savings"
-          />
-          <RecommendationItem
-            priority="Planning"
-            color="text-purple-400"
-            text="Evaluate contractor support for March sprint - defer non-critical documentation to Q2"
-          />
+          {blockedTickets.length > 0 && (
+            <RecommendationItem
+              priority="Immediate"
+              color="text-rose-400"
+              text={`Unblock ${blockedTickets.length} item(s) preventing progress: ${blockedTickets.slice(0, 2).map(t => t.id).join(', ')}${blockedTickets.length > 2 ? `, and ${blockedTickets.length - 2} more` : ''}. Schedule resolution meeting within 48 hours.`}
+            />
+          )}
+          {overdueTickets.length > 0 && (
+            <RecommendationItem
+              priority="This Week"
+              color="text-amber-400"
+              text={`Address ${overdueTickets.length} overdue item(s). ${overdueTickets.length > 5 ? 'Consider daily standup focused on clearing backlog and resource reallocation.' : 'Review priorities and adjust timelines as needed.'}`}
+            />
+          )}
+          {avgTicketsPerPerson > 15 && (
+            <RecommendationItem
+              priority="Resource Planning"
+              color="text-amber-400"
+              text={`Team capacity at high utilization (${avgTicketsPerPerson} tickets/person average). Evaluate contractor support and consider deferring lower priority work.`}
+            />
+          )}
+          {readyForReviewCount > 0 && (
+            <RecommendationItem
+              priority="This Week"
+              color="text-blue-400"
+              text={`${readyForReviewCount} item(s) ready for review. Schedule demos for completed work and prepare for deployment.`}
+            />
+          )}
+          {securityCount > 5 && (
+            <RecommendationItem
+              priority="Compliance"
+              color="text-purple-400"
+              text={`Strong security focus with ${securityCount} items. ${securityInProgress > 0 ? `${securityInProgress} actively in progress.` : 'Consider prioritizing security items for compliance deadlines.'} Prepare executive summary of security posture improvements.`}
+            />
+          )}
+          {blockedTickets.length === 0 && overdueTickets.length === 0 && avgTicketsPerPerson <= 15 && (
+            <RecommendationItem
+              priority="On Track"
+              color="text-teal-400"
+              text="Team is performing well with no major blockers. Continue current velocity and monitor for emerging risks. Schedule regular stakeholder updates to showcase progress."
+            />
+          )}
         </div>
       </div>
 
@@ -267,27 +394,27 @@ export default function Takeaways({ tickets, stats }: TakeawaysProps) {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <SuccessMetric
           icon="✅"
-          value="75%"
+          value={`${onTrackPercentage}%`}
           label="On-Track Items"
-          color="text-teal-400"
+          color={onTrackPercentage >= 70 ? 'text-teal-400' : onTrackPercentage >= 50 ? 'text-amber-400' : 'text-rose-400'}
         />
         <SuccessMetric
           icon="🎯"
-          value="4"
-          label="Critical Deliverables"
+          value={String(highPriorityCount)}
+          label="High Priority Items"
           color="text-blue-400"
         />
         <SuccessMetric
           icon="👥"
-          value="95%"
-          label="Team Utilization"
-          color="text-amber-400"
+          value={String(uniqueAssignees)}
+          label="Active Team Members"
+          color="text-purple-400"
         />
         <SuccessMetric
           icon="📈"
-          value="High"
-          label="Business Impact"
-          color="text-purple-400"
+          value={String(stats.byCategory.Feature || 0)}
+          label="Feature Requests"
+          color="text-teal-400"
         />
       </div>
     </div>
