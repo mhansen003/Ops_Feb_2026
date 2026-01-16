@@ -1,20 +1,22 @@
 import { NextResponse } from 'next/server';
-import { getAllTickets, getTicketStats, initializeDatabase } from '@/lib/db';
+import { getAllTickets, getTicketStats, initializeDatabase, getLastImport } from '@/lib/db';
 
 export async function GET() {
   try {
     // Ensure database is initialized
     await initializeDatabase();
 
-    const [tickets, stats] = await Promise.all([
+    const [tickets, stats, lastImport] = await Promise.all([
       getAllTickets(),
-      getTicketStats()
+      getTicketStats(),
+      getLastImport()
     ]);
 
     return NextResponse.json({
       success: true,
       tickets,
-      stats
+      stats,
+      lastImport
     });
   } catch (error: any) {
     console.error('Error fetching tickets:', error);

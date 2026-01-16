@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchAllADOTickets } from '@/lib/ado';
-import { clearTickets, insertTickets, initializeDatabase } from '@/lib/db';
+import { clearTickets, insertTickets, initializeDatabase, logImport } from '@/lib/db';
 
 export const maxDuration = 60; // Allow up to 60 seconds for this operation
 
@@ -40,6 +40,13 @@ export async function POST(request: Request) {
     // Insert new data
     console.log('Inserting new tickets...');
     await insertTickets(tickets);
+
+    // Log the import
+    const selectedProjects = [];
+    if (selection.byteLos) selectedProjects.push('Byte LOS');
+    if (selection.byte) selectedProjects.push('BYTE');
+    if (selection.productMasters) selectedProjects.push('Product Masters');
+    await logImport(tickets.length, selectedProjects);
 
     console.log('Data refresh completed successfully');
 

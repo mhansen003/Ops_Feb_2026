@@ -7,7 +7,7 @@ import TicketGrid from '@/components/TicketGrid';
 import CriticalQuestions from '@/components/CriticalQuestions';
 import Takeaways from '@/components/Takeaways';
 import RefreshModal, { type ProjectSelection } from '@/components/RefreshModal';
-import { fetchTickets, refreshData, type Ticket, type TicketStats } from '@/lib/data-client';
+import { fetchTickets, refreshData, type Ticket, type TicketStats, type LastImport } from '@/lib/data-client';
 
 type Tab = 'dashboard' | 'calendar' | 'tickets' | 'questions' | 'takeaways';
 
@@ -15,6 +15,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<TicketStats | null>(null);
+  const [lastImport, setLastImport] = useState<LastImport | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +28,7 @@ export default function Home() {
       const data = await fetchTickets();
       setTickets(data.tickets);
       setStats(data.stats);
+      setLastImport(data.lastImport);
     } catch (err: any) {
       setError(err.message);
       console.error('Error loading data:', err);
@@ -74,10 +76,17 @@ export default function Home() {
               <h1 className="text-4xl font-bold mb-2 gradient-text">
                 Operations Backlog
               </h1>
-              <p className="text-lg text-gray-400">
-                Executive Operations Dashboard - February 2026
-                {stats && <span className="ml-4 text-sm">({stats.total} tickets loaded)</span>}
-              </p>
+              <div className="space-y-1">
+                <p className="text-lg text-gray-400">
+                  Executive Operations Dashboard - February 2026
+                  {stats && <span className="ml-4 text-sm">({stats.total} tickets loaded)</span>}
+                </p>
+                {lastImport && (
+                  <p className="text-sm text-gray-500">
+                    Last imported: {new Date(lastImport.imported_at).toLocaleString()} from {lastImport.projects.join(', ')}
+                  </p>
+                )}
+              </div>
             </div>
             <button
               onClick={() => setShowRefreshModal(true)}

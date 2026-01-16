@@ -47,6 +47,15 @@ export async function initializeDatabase() {
     `;
 
     await sql`
+      CREATE TABLE IF NOT EXISTS import_log (
+        id SERIAL PRIMARY KEY,
+        imported_at TIMESTAMP DEFAULT NOW(),
+        ticket_count INTEGER,
+        projects TEXT[]
+      )
+    `;
+
+    await sql`
       CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority)
     `;
 
@@ -176,6 +185,34 @@ export async function getTicketStats() {
       };
     }
     throw error;
+  }
+}
+
+export async function logImport(ticketCount: number, projects: string[]) {
+  try {
+    await sql`
+      INSERT INTO import_log (ticket_count, projects)
+      VALUES (${ticketCount}, ${projects})
+    `;
+    console.log('Import logged successfully');
+  } catch (error: any) {
+    console.error('Error logging import:', error);
+    // Don't throw - this is not critical
+  }
+}
+
+export async function getLastImport() {
+  try {
+    const result = await sql`
+      SELECT imported_at, ticket_count, projects
+      FROM import_log
+      ORDER BY imported_at DESC
+      LIMIT 1
+    `;
+    return result[0] || null;
+  } catch (error: any) {
+    console.error('Error getting last import:', error);
+    return null;
   }
 }
 

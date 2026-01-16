@@ -43,7 +43,13 @@ export interface TicketStats {
   };
 }
 
-export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: TicketStats }> {
+export interface LastImport {
+  imported_at: string;
+  ticket_count: number;
+  projects: string[];
+}
+
+export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: TicketStats; lastImport: LastImport | null }> {
   const response = await fetch('/api/tickets', {
     cache: 'no-store'
   });
@@ -96,7 +102,7 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
     },
   };
 
-  return { tickets, stats };
+  return { tickets, stats, lastImport: data.lastImport };
 }
 
 export interface ProjectSelection {
