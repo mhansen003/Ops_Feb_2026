@@ -62,7 +62,7 @@ async function fetchQueryResults(project: string, queryId: string) {
   try {
     // Use direct WIQL query instead of saved query ID
     const wiqlQuery = {
-      query: `SELECT [System.Id], [System.Title], [System.Description], [System.WorkItemType], [System.State], [System.AssignedTo], [System.CreatedDate], [System.Priority], [System.Tags], [Microsoft.VSTS.Scheduling.TargetDate], [Microsoft.VSTS.Scheduling.StoryPoints] FROM WorkItems WHERE [System.TeamProject] = '${project}' ORDER BY [System.Id] DESC`
+      query: "SELECT [System.Id], [System.Title], [System.Description], [System.WorkItemType], [System.State], [System.AssignedTo], [System.CreatedDate], [System.Priority], [System.Tags], [Microsoft.VSTS.Scheduling.TargetDate], [Microsoft.VSTS.Scheduling.StoryPoints] FROM WorkItems WHERE [System.TeamProject] = '" + project + "' ORDER BY [System.Id] DESC"
     };
 
     const queryUrl = `https://dev.azure.com/${ADO_ORGANIZATION}/${encodeURIComponent(project)}/_apis/wit/wiql?api-version=7.0`;
