@@ -41,18 +41,18 @@ export interface ProjectSelection {
 const allQueries: ADOQuery[] = [
   {
     key: 'byteLos',
-    project: 'Byte LOS',
-    queryId: '94e0457e-f611-4750-9515-0da963fd5feb' // Byte Active Work Items
+    project: process.env.ADO_PROJECT_1 || 'Byte LOS',
+    queryId: process.env.ADO_QUERY_1 || '94e0457e-f611-4750-9515-0da963fd5feb'
   },
   {
     key: 'byte',
-    project: 'BYTE',
-    queryId: 'b9dd35a8-581a-46e9-b961-b1de1446fa39' // BYTE Dev backlog 1.13.26
+    project: process.env.ADO_PROJECT_2 || 'BYTE',
+    queryId: process.env.ADO_QUERY_2 || 'b9dd35a8-581a-46e9-b961-b1de1446fa39'
   },
   {
     key: 'productMasters',
-    project: 'Product Masters',
-    queryId: '06c11dac-3527-4f60-b6ed-3eee4243ba1f' // Operations Backlog All 1.14.26
+    project: process.env.ADO_PROJECT_3 || 'Product Masters',
+    queryId: process.env.ADO_QUERY_3 || '06c11dac-3527-4f60-b6ed-3eee4243ba1f'
   }
 ];
 
