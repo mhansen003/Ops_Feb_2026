@@ -182,30 +182,30 @@ export async function fetchAllADOTickets(selection?: ProjectSelection) {
   }
 
   // Transform to our ticket format
-  const tickets = Array.from(uniqueWorkItems.values()).map(item => {
-    const fields = item.fields;
-    const tags = fields['System.Tags']?.split(';').map((t: string) => t.trim()).filter(Boolean) || [];
+  const tickets = Array.from(uniqueWorkItems.values())
+    .filter(item => item.id) // Filter out items without valid IDs
+    .map(item => {
+      const fields = item.fields;
+      const tags = fields['System.Tags']?.split(';').map((t: string) => t.trim()).filter(Boolean) || [];
 
-    return {
-      id: `WI-${fields['System.Id']}`,
-      title: fields['System.Title'] || 'Untitled',
-      description: fields['System.Description'] || '',
-      priority: mapPriority(fields['System.Priority']),
-      status: mapStatus(fields['System.State']),
-      category: mapCategory(fields['System.WorkItemType']),
-      assignee: fields['System.AssignedTo']?.displayName || 'Unassigned',
-      created_date: fields['System.CreatedDate'],
-      target_date: fields['Microsoft.VSTS.Scheduling.TargetDate'] || fields['System.CreatedDate'],
-      estimated_effort: parseEstimatedEffort(fields['Microsoft.VSTS.Scheduling.StoryPoints']),
-      dependencies: null,
-      tags: tags,
-      project: item.url.includes('Byte%20LOS') ? 'Byte LOS' :
-               item.url.includes('BYTE/') ? 'BYTE' :
-               item.url.includes('Product%20Masters') ? 'Product Masters' : 'Unknown',
-      work_item_type: fields['System.WorkItemType'],
-      state: fields['System.State']
-    };
-  });
+      return {
+        id: `WI-${item.id}`,
+        title: fields['System.Title'] || 'Untitled',
+        description: fields['System.Description'] || '',
+        priority: mapPriority(fields['System.Priority']),
+        status: mapStatus(fields['System.State']),
+        category: mapCategory(fields['System.WorkItemType']),
+        assignee: fields['System.AssignedTo']?.displayName || 'Unassigned',
+        created_date: fields['System.CreatedDate'],
+        target_date: fields['Microsoft.VSTS.Scheduling.TargetDate'] || fields['System.CreatedDate'],
+        estimated_effort: parseEstimatedEffort(fields['Microsoft.VSTS.Scheduling.StoryPoints']),
+        dependencies: null,
+        tags: tags,
+        project: fields['System.TeamProject'] || 'Unknown',
+        work_item_type: fields['System.WorkItemType'],
+        state: fields['System.State']
+      };
+    });
 
   return {
     tickets,
