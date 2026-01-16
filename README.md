@@ -70,6 +70,10 @@ ops-feb-2026/
     └── data.ts              # Data types and placeholder data
 ```
 
+## Live Dashboard
+
+**Production URL:** https://ops-feb-2026-nhwoqx8i9-cmgprojects.vercel.app
+
 ## Created By
 
 Built with Claude Code for operations leadership presentation.
