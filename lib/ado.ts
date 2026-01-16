@@ -67,7 +67,11 @@ async function fetchQueryResults(project: string, queryId: string) {
 
     const queryUrl = `https://dev.azure.com/${ADO_ORGANIZATION}/${encodeURIComponent(project)}/_apis/wit/wiql?api-version=7.0`;
 
-    console.log(`Fetching work items from ${project} using direct WIQL...`);
+    console.log(`[ADO] Fetching from project: "${project}"`);
+    console.log(`[ADO] Query URL: ${queryUrl}`);
+    console.log(`[ADO] WIQL Query: ${wiqlQuery.query}`);
+    console.log(`[ADO] Organization: ${ADO_ORGANIZATION}`);
+    console.log(`[ADO] PAT length: ${ADO_PAT?.length || 0}`);
 
     const queryResponse = await axios.post(queryUrl, wiqlQuery, {
       headers: {
@@ -76,7 +80,10 @@ async function fetchQueryResults(project: string, queryId: string) {
       }
     });
 
-    console.log(`Query response for ${project}:`, JSON.stringify(queryResponse.data).substring(0, 500));
+    console.log(`[ADO] Response status: ${queryResponse.status}`);
+    console.log(`[ADO] Response data keys:`, Object.keys(queryResponse.data));
+    console.log(`[ADO] Work items array length:`, queryResponse.data.workItems?.length || 0);
+    console.log(`[ADO] Full response:`, JSON.stringify(queryResponse.data).substring(0, 1000));
 
     const workItemRefs = queryResponse.data.workItems || [];
 
