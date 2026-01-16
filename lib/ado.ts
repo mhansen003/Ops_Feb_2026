@@ -42,17 +42,17 @@ const allQueries: ADOQuery[] = [
   {
     key: 'byteLos',
     project: process.env.ADO_PROJECT_1 || 'Byte LOS',
-    queryId: process.env.ADO_QUERY_1 || '94e0457e-f611-4750-9515-0da963fd5feb'
+    queryId: '' // Not used with direct WIQL
   },
   {
     key: 'byte',
     project: process.env.ADO_PROJECT_2 || 'BYTE',
-    queryId: process.env.ADO_QUERY_2 || 'b9dd35a8-581a-46e9-b961-b1de1446fa39'
+    queryId: '' // Not used with direct WIQL
   },
   {
     key: 'productMasters',
     project: process.env.ADO_PROJECT_3 || 'Product Masters',
-    queryId: process.env.ADO_QUERY_3 || '06c11dac-3527-4f60-b6ed-3eee4243ba1f'
+    queryId: '' // Not used with direct WIQL
   }
 ];
 
@@ -60,12 +60,16 @@ async function fetchQueryResults(project: string, queryId: string) {
   const auth = Buffer.from(`:${ADO_PAT}`).toString('base64');
 
   try {
-    // First, get the query results (work item IDs)
-    const queryUrl = `https://dev.azure.com/${ADO_ORGANIZATION}/${encodeURIComponent(project)}/_apis/wit/wiql/${queryId}?api-version=7.0`;
+    // Use direct WIQL query instead of saved query ID
+    const wiqlQuery = {
+      query: `SELECT [System.Id], [System.Title], [System.Description], [System.WorkItemType], [System.State], [System.AssignedTo], [System.CreatedDate], [System.Priority], [System.Tags], [Microsoft.VSTS.Scheduling.TargetDate], [Microsoft.VSTS.Scheduling.StoryPoints] FROM WorkItems WHERE [System.TeamProject] = '${project}' ORDER BY [System.Id] DESC`
+    };
 
-    console.log(`Fetching query results from: ${queryUrl}`);
+    const queryUrl = `https://dev.azure.com/${ADO_ORGANIZATION}/${encodeURIComponent(project)}/_apis/wit/wiql?api-version=7.0`;
 
-    const queryResponse = await axios.get(queryUrl, {
+    console.log(`Fetching work items from ${project} using direct WIQL...`);
+
+    const queryResponse = await axios.post(queryUrl, wiqlQuery, {
       headers: {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json'
