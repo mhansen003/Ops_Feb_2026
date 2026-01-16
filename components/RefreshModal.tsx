@@ -107,7 +107,7 @@ export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing 
                     Byte LOS
                   </div>
                   <div className="text-xs text-gray-500">
-                    Query: 4d29bc56-ad8d-43fb-9de8-f5032de8149c
+                    Byte Active Work Items
                   </div>
                 </div>
                 <div className="text-xs font-mono px-2 py-1 bg-teal-500/20 text-teal-400 rounded">
@@ -131,7 +131,7 @@ export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing 
                     BYTE
                   </div>
                   <div className="text-xs text-gray-500">
-                    Query: ba574226-2715-4616-a2f6-33e01fcdb319
+                    BYTE Dev Backlog 1.13.26
                   </div>
                 </div>
                 <div className="text-xs font-mono px-2 py-1 bg-blue-500/20 text-blue-400 rounded">
@@ -155,7 +155,7 @@ export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing 
                     Product Masters
                   </div>
                   <div className="text-xs text-gray-500">
-                    Query: 9cf4112e-b407-450f-915f-74182da51ce1
+                    Operations Backlog All 1.14.26
                   </div>
                 </div>
                 <div className="text-xs font-mono px-2 py-1 bg-purple-500/20 text-purple-400 rounded">

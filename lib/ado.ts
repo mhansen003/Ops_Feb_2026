@@ -41,17 +41,17 @@ const allQueries: ADOQuery[] = [
   {
     key: 'byteLos',
     project: 'Byte LOS',
-    queryId: '4d29bc56-ad8d-43fb-9de8-f5032de8149c'
+    queryId: '94e0457e-f611-4750-9515-0da963fd5feb' // Byte Active Work Items
   },
   {
     key: 'byte',
     project: 'BYTE',
-    queryId: 'ba574226-2715-4616-a2f6-33e01fcdb319'
+    queryId: 'b9dd35a8-581a-46e9-b961-b1de1446fa39' // BYTE Dev backlog 1.13.26
   },
   {
     key: 'productMasters',
     project: 'Product Masters',
-    queryId: '9cf4112e-b407-450f-915f-74182da51ce1'
+    queryId: '06c11dac-3527-4f60-b6ed-3eee4243ba1f' // Operations Backlog All 1.14.26
   }
 ];
 
