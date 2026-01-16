@@ -4,16 +4,32 @@ import { clearTickets, insertTickets, initializeDatabase } from '@/lib/db';
 
 export const maxDuration = 60; // Allow up to 60 seconds for this operation
 
-export async function POST() {
+interface ProjectSelection {
+  byteLos: boolean;
+  byte: boolean;
+  productMasters: boolean;
+}
+
+export async function POST(request: Request) {
   try {
     console.log('Starting data refresh...');
+
+    // Parse request body
+    const body = await request.json();
+    const selection: ProjectSelection = body.selection || {
+      byteLos: true,
+      byte: true,
+      productMasters: true
+    };
+
+    console.log('Project selection:', selection);
 
     // Ensure database is initialized
     await initializeDatabase();
 
-    // Fetch data from ADO
+    // Fetch data from ADO with selection
     console.log('Fetching ADO data...');
-    const { tickets, stats } = await fetchAllADOTickets();
+    const { tickets, stats } = await fetchAllADOTickets(selection);
 
     console.log(`Fetched ${tickets.length} tickets from ADO`);
 

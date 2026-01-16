@@ -28,18 +28,28 @@ interface ADOWorkItem {
 export interface ADOQuery {
   project: string;
   queryId: string;
+  key: 'byteLos' | 'byte' | 'productMasters';
 }
 
-const queries: ADOQuery[] = [
+export interface ProjectSelection {
+  byteLos: boolean;
+  byte: boolean;
+  productMasters: boolean;
+}
+
+const allQueries: ADOQuery[] = [
   {
+    key: 'byteLos',
     project: 'Byte LOS',
     queryId: '4d29bc56-ad8d-43fb-9de8-f5032de8149c'
   },
   {
+    key: 'byte',
     project: 'BYTE',
     queryId: 'ba574226-2715-4616-a2f6-33e01fcdb319'
   },
   {
+    key: 'productMasters',
     project: 'Product Masters',
     queryId: '9cf4112e-b407-450f-915f-74182da51ce1'
   }
@@ -133,9 +143,21 @@ function parseEstimatedEffort(storyPoints?: number): string {
   return '4+ weeks';
 }
 
-export async function fetchAllADOTickets() {
+export async function fetchAllADOTickets(selection?: ProjectSelection) {
   const allWorkItems: ADOWorkItem[] = [];
   const errors: string[] = [];
+
+  // If no selection provided, select all
+  const effectiveSelection = selection || {
+    byteLos: true,
+    byte: true,
+    productMasters: true
+  };
+
+  // Filter queries based on selection
+  const queries = allQueries.filter(q => effectiveSelection[q.key]);
+
+  console.log(`Fetching from ${queries.length} selected projects:`, queries.map(q => q.project));
 
   for (const query of queries) {
     try {

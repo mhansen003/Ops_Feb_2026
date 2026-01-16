@@ -99,9 +99,19 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
   return { tickets, stats };
 }
 
-export async function refreshData(): Promise<{ success: boolean; message: string; stats?: any }> {
+export interface ProjectSelection {
+  byteLos: boolean;
+  byte: boolean;
+  productMasters: boolean;
+}
+
+export async function refreshData(selection: ProjectSelection): Promise<{ success: boolean; message: string; stats?: any }> {
   const response = await fetch('/api/refresh', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ selection }),
   });
 
   const data = await response.json();

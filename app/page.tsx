@@ -6,6 +6,7 @@ import Calendar from '@/components/Calendar';
 import TicketGrid from '@/components/TicketGrid';
 import CriticalQuestions from '@/components/CriticalQuestions';
 import Takeaways from '@/components/Takeaways';
+import RefreshModal, { type ProjectSelection } from '@/components/RefreshModal';
 import { fetchTickets, refreshData, type Ticket, type TicketStats } from '@/lib/data-client';
 
 type Tab = 'dashboard' | 'calendar' | 'tickets' | 'questions' | 'takeaways';
@@ -17,6 +18,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showRefreshModal, setShowRefreshModal] = useState(false);
 
   const loadData = async () => {
     try {
@@ -33,13 +35,14 @@ export default function Home() {
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = async (selection: ProjectSelection) => {
     try {
       setRefreshing(true);
       setError(null);
-      const result = await refreshData();
+      const result = await refreshData(selection);
       if (result.success) {
         await loadData();
+        setShowRefreshModal(false);
       }
     } catch (err: any) {
       setError(err.message);
@@ -77,7 +80,7 @@ export default function Home() {
               </p>
             </div>
             <button
-              onClick={handleRefresh}
+              onClick={() => setShowRefreshModal(true)}
               disabled={refreshing}
               className={`px-6 py-3 rounded-lg font-medium transition-all ${
                 refreshing
@@ -85,19 +88,9 @@ export default function Home() {
                   : 'bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:shadow-lg hover:scale-105'
               }`}
             >
-              {refreshing ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Refreshing...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  🔄 Refresh from ADO
-                </span>
-              )}
+              <span className="flex items-center gap-2">
+                🔄 Refresh from ADO
+              </span>
             </button>
           </div>
           {error && (
@@ -138,7 +131,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold mb-4">No Data Available</h2>
               <p className="text-gray-400 mb-6">Click "Refresh from ADO" to import tickets from Azure DevOps</p>
               <button
-                onClick={handleRefresh}
+                onClick={() => setShowRefreshModal(true)}
                 className="px-6 py-3 rounded-lg font-medium bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:shadow-lg hover:scale-105 transition-all"
               >
                 🔄 Import Data Now
@@ -154,6 +147,14 @@ export default function Home() {
             </>
           )}
         </div>
+
+        {/* Refresh Modal */}
+        <RefreshModal
+          isOpen={showRefreshModal}
+          onClose={() => !refreshing && setShowRefreshModal(false)}
+          onConfirm={handleRefresh}
+          isRefreshing={refreshing}
+        />
       </div>
     </main>
   );
