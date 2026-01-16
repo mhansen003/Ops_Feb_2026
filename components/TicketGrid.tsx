@@ -13,19 +13,24 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
   const [filterStatus, setFilterStatus] = useState<Status | 'All'>('All');
+  const [filterProject, setFilterProject] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Get unique projects
+  const projects = ['All', ...Array.from(new Set(tickets.map(t => t.project).filter(Boolean)))].sort();
 
   // Filter tickets
   let filteredTickets = tickets.filter(ticket => {
     const matchesPriority = filterPriority === 'All' || ticket.priority === filterPriority;
     const matchesStatus = filterStatus === 'All' || ticket.status === filterStatus;
+    const matchesProject = filterProject === 'All' || ticket.project === filterProject;
     const matchesSearch = searchTerm === '' ||
       ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.assignee.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesPriority && matchesStatus && matchesSearch;
+    return matchesPriority && matchesStatus && matchesProject && matchesSearch;
   });
 
   // Sort tickets
@@ -67,7 +72,7 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
       <div className="card">
         <h2 className="text-2xl font-bold mb-6">Ticket Grid</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {/* Search */}
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-400 mb-2">Search</label>
@@ -78,6 +83,20 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
               placeholder="Search tickets..."
               className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+          </div>
+
+          {/* Project Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Project</label>
+            <select
+              value={filterProject}
+              onChange={(e) => setFilterProject(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {projects.map(project => (
+                <option key={project} value={project}>{project}</option>
+              ))}
+            </select>
           </div>
 
           {/* Priority Filter */}
@@ -219,10 +238,15 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
             </tr>
           </thead>
           <tbody>
-            {filteredTickets.map((ticket) => (
+            {filteredTickets.map((ticket) => {
+              const isOverdue = new Date(ticket.targetDate) < new Date();
+
+              return (
               <tr
                 key={ticket.id}
-                className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors"
+                className={`border-b border-gray-800 hover:bg-gray-800/30 transition-colors ${
+                  isOverdue ? 'bg-rose-500/5 border-rose-500/20' : ''
+                }`}
               >
                 <td className="py-4 px-4">
                   <span className="font-mono text-sm text-gray-400">{ticket.id}</span>
@@ -256,18 +280,26 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
                   </span>
                 </td>
                 <td className="py-4 px-4">
-                  <span className="text-sm text-gray-400">
-                    {new Date(ticket.targetDate).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm ${isOverdue ? 'text-rose-400 font-semibold' : 'text-gray-400'}`}>
+                      {new Date(ticket.targetDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}
+                    </span>
+                    {isOverdue && (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-semibold">
+                        OVERDUE
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-4 px-4">
                   <span className="text-sm text-gray-400">{ticket.estimatedEffort}</span>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
 
