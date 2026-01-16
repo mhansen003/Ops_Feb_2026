@@ -23,43 +23,59 @@ export interface DBTicket {
 }
 
 export async function initializeDatabase() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS tickets (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      description TEXT,
-      priority TEXT,
-      status TEXT,
-      category TEXT,
-      assignee TEXT,
-      created_date TIMESTAMP,
-      target_date TIMESTAMP,
-      estimated_effort TEXT,
-      dependencies TEXT,
-      tags TEXT[],
-      project TEXT,
-      work_item_type TEXT,
-      state TEXT,
-      created_at TIMESTAMP DEFAULT NOW(),
-      updated_at TIMESTAMP DEFAULT NOW()
-    )
-  `;
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS tickets (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT,
+        priority TEXT,
+        status TEXT,
+        category TEXT,
+        assignee TEXT,
+        created_date TIMESTAMP,
+        target_date TIMESTAMP,
+        estimated_effort TEXT,
+        dependencies TEXT,
+        tags TEXT[],
+        project TEXT,
+        work_item_type TEXT,
+        state TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
 
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority)
-  `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority)
+    `;
 
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status)
-  `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status)
+    `;
 
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_tickets_created_date ON tickets(created_date)
-  `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_tickets_created_date ON tickets(created_date)
+    `;
+
+    console.log('Database initialized successfully');
+  } catch (error: any) {
+    console.error('Database initialization error:', error);
+    throw error;
+  }
 }
 
 export async function clearTickets() {
-  await sql`DELETE FROM tickets`;
+  try {
+    await sql`DELETE FROM tickets`;
+    console.log('Tickets cleared successfully');
+  } catch (error: any) {
+    console.error('Error clearing tickets:', error);
+    // If table doesn't exist, that's fine
+    if (!error.message?.includes('does not exist')) {
+      throw error;
+    }
+  }
 }
 
 export async function insertTickets(tickets: Omit<DBTicket, 'created_at' | 'updated_at'>[]) {
@@ -109,29 +125,58 @@ export async function insertTickets(tickets: Omit<DBTicket, 'created_at' | 'upda
 }
 
 export async function getAllTickets(): Promise<DBTicket[]> {
-  const tickets = await sql`
-    SELECT * FROM tickets
-    ORDER BY created_date DESC
-  `;
-  return tickets as DBTicket[];
+  try {
+    const tickets = await sql`
+      SELECT * FROM tickets
+      ORDER BY created_date DESC
+    `;
+    return tickets as DBTicket[];
+  } catch (error: any) {
+    console.error('Error getting all tickets:', error);
+    // If table doesn't exist, return empty array
+    if (error.message?.includes('does not exist')) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function getTicketStats() {
-  const stats = await sql`
-    SELECT
-      COUNT(*) as total,
-      COUNT(*) FILTER (WHERE priority = 'Critical') as critical,
-      COUNT(*) FILTER (WHERE priority = 'High') as high,
-      COUNT(*) FILTER (WHERE priority = 'Medium') as medium,
-      COUNT(*) FILTER (WHERE priority = 'Low') as low,
-      COUNT(*) FILTER (WHERE status = 'New') as new,
-      COUNT(*) FILTER (WHERE status = 'In Progress') as in_progress,
-      COUNT(*) FILTER (WHERE status = 'Blocked') as blocked,
-      COUNT(*) FILTER (WHERE status = 'Ready for Review') as ready_for_review,
-      COUNT(*) FILTER (WHERE status = 'Completed') as completed
-    FROM tickets
-  `;
-  return stats[0];
+  try {
+    const stats = await sql`
+      SELECT
+        COUNT(*) as total,
+        COUNT(*) FILTER (WHERE priority = 'Critical') as critical,
+        COUNT(*) FILTER (WHERE priority = 'High') as high,
+        COUNT(*) FILTER (WHERE priority = 'Medium') as medium,
+        COUNT(*) FILTER (WHERE priority = 'Low') as low,
+        COUNT(*) FILTER (WHERE status = 'New') as new,
+        COUNT(*) FILTER (WHERE status = 'In Progress') as in_progress,
+        COUNT(*) FILTER (WHERE status = 'Blocked') as blocked,
+        COUNT(*) FILTER (WHERE status = 'Ready for Review') as ready_for_review,
+        COUNT(*) FILTER (WHERE status = 'Completed') as completed
+      FROM tickets
+    `;
+    return stats[0];
+  } catch (error: any) {
+    console.error('Error getting ticket stats:', error);
+    // If table doesn't exist, return zero stats
+    if (error.message?.includes('does not exist')) {
+      return {
+        total: 0,
+        critical: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+        new: 0,
+        in_progress: 0,
+        blocked: 0,
+        ready_for_review: 0,
+        completed: 0
+      };
+    }
+    throw error;
+  }
 }
 
 export { sql };
