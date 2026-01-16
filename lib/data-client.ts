@@ -41,6 +41,7 @@ export interface TicketStats {
     'Bug Fix': number;
     Documentation: number;
   };
+  byProject: Record<string, number>;
 }
 
 export interface LastImport {
@@ -100,6 +101,11 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
       'Bug Fix': tickets.filter(t => t.category === 'Bug Fix').length,
       Documentation: tickets.filter(t => t.category === 'Documentation').length,
     },
+    byProject: tickets.reduce((acc, ticket) => {
+      const project = ticket.project || 'Unassigned';
+      acc[project] = (acc[project] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>),
   };
 
   return { tickets, stats, lastImport: data.lastImport };
