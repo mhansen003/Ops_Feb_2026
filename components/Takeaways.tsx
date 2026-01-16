@@ -1,9 +1,13 @@
 'use client';
 
-import { getStatistics } from '@/lib/data';
+import { type Ticket, type TicketStats } from '@/lib/data-client';
 
-export default function Takeaways() {
-  const stats = getStatistics();
+interface TakeawaysProps {
+  tickets: Ticket[];
+  stats: TicketStats;
+}
+
+export default function Takeaways({ tickets, stats }: TakeawaysProps) {
 
   const keyTakeaways = [
     {

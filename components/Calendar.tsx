@@ -1,9 +1,13 @@
 'use client';
 
-import { tickets } from '@/lib/data';
+import { type Ticket } from '@/lib/data-client';
 import { useState } from 'react';
 
-export default function Calendar() {
+interface CalendarProps {
+  tickets: Ticket[];
+}
+
+export default function Calendar({ tickets }: CalendarProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Group tickets by date

@@ -1,9 +1,13 @@
 'use client';
 
-import { tickets, getStatistics } from '@/lib/data';
+import { type Ticket, type TicketStats } from '@/lib/data-client';
 
-export default function CriticalQuestions() {
-  const stats = getStatistics();
+interface CriticalQuestionsProps {
+  tickets: Ticket[];
+  stats: TicketStats;
+}
+
+export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsProps) {
 
   const questions = [
     {

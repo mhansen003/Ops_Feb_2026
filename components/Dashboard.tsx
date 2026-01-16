@@ -1,10 +1,14 @@
 'use client';
 
-import { tickets, getStatistics } from '@/lib/data';
+import { type Ticket, type TicketStats } from '@/lib/data-client';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-export default function Dashboard() {
-  const stats = getStatistics();
+interface DashboardProps {
+  tickets: Ticket[];
+  stats: TicketStats;
+}
+
+export default function Dashboard({ tickets, stats }: DashboardProps) {
 
   const priorityData = [
     { name: 'Critical', value: stats.byPriority.Critical, color: '#f43f5e' },

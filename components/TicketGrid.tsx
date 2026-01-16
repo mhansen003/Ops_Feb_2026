@@ -1,9 +1,14 @@
 'use client';
 
-import { tickets, type Ticket, type Priority, type Status } from '@/lib/data';
+import { type Ticket, type Priority, type Status } from '@/lib/data-client';
 import { useState } from 'react';
 
-export default function TicketGrid() {
+interface TicketGridProps {
+  tickets: Ticket[];
+}
+
+export default function TicketGrid({ tickets: initialTickets }: TicketGridProps) {
+  const tickets = initialTickets;
   const [sortField, setSortField] = useState<keyof Ticket>('createdDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
