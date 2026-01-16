@@ -131,12 +131,48 @@ function mapStatus(state: string): string {
   return state;
 }
 
-function mapCategory(workItemType: string): string {
+function mapCategory(workItemType: string, title: string, tags: string[]): string {
   const typeLower = workItemType.toLowerCase();
-  if (typeLower.includes('bug')) return 'Bug Fix';
-  if (typeLower.includes('feature') || typeLower.includes('user story')) return 'Feature';
-  if (typeLower.includes('task')) return 'Infrastructure';
-  if (typeLower.includes('epic')) return 'Feature';
+  const titleLower = title.toLowerCase();
+  const tagsLower = tags.map(t => t.toLowerCase()).join(' ');
+  const combined = `${typeLower} ${titleLower} ${tagsLower}`;
+
+  // Check for security-related items
+  if (combined.includes('security') || combined.includes('permission') ||
+      combined.includes('access') || combined.includes('auth') ||
+      typeLower.includes('security')) {
+    return 'Security';
+  }
+
+  // Check for bugs
+  if (combined.includes('bug') || combined.includes('fix') ||
+      combined.includes('defect') || combined.includes('issue')) {
+    return 'Bug Fix';
+  }
+
+  // Check for performance items
+  if (combined.includes('performance') || combined.includes('optimization') ||
+      combined.includes('speed') || combined.includes('slow')) {
+    return 'Performance';
+  }
+
+  // Check for documentation
+  if (combined.includes('documentation') || combined.includes('readme') ||
+      combined.includes('docs') || combined.includes('guide')) {
+    return 'Documentation';
+  }
+
+  // Feature-related work
+  if (typeLower.includes('feature') || typeLower.includes('user story') ||
+      typeLower.includes('epic') || titleLower.includes('new feature')) {
+    return 'Feature';
+  }
+
+  // Infrastructure/Tasks
+  if (typeLower.includes('task') || typeLower.includes('request')) {
+    return 'Infrastructure';
+  }
+
   return 'Infrastructure';
 }
 
@@ -189,13 +225,16 @@ export async function fetchAllADOTickets(selection?: ProjectSelection) {
       const fields = item.fields;
       const tags = fields['System.Tags']?.split(';').map((t: string) => t.trim()).filter(Boolean) || [];
 
+      const title = fields['System.Title'] || 'Untitled';
+      const workItemType = fields['System.WorkItemType'];
+
       return {
         id: `WI-${item.id}`,
-        title: fields['System.Title'] || 'Untitled',
+        title: title,
         description: fields['System.Description'] || '',
         priority: mapPriority(fields['System.Priority']),
         status: mapStatus(fields['System.State']),
-        category: mapCategory(fields['System.WorkItemType']),
+        category: mapCategory(workItemType, title, tags),
         assignee: fields['System.AssignedTo']?.displayName || 'Unassigned',
         created_date: fields['System.CreatedDate'],
         target_date: fields['Microsoft.VSTS.Scheduling.TargetDate'] || fields['System.CreatedDate'],
@@ -203,7 +242,7 @@ export async function fetchAllADOTickets(selection?: ProjectSelection) {
         dependencies: null,
         tags: tags,
         project: fields['System.TeamProject'] || 'Unknown',
-        work_item_type: fields['System.WorkItemType'],
+        work_item_type: workItemType,
         state: fields['System.State']
       };
     });
