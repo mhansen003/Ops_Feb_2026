@@ -6,6 +6,7 @@ export interface ProjectSelection {
   byteLos: boolean;
   byte: boolean;
   productMasters: boolean;
+  includeCompleted?: boolean;
 }
 
 interface RefreshModalProps {

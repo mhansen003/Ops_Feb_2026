@@ -312,9 +312,11 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
             <div className="text-3xl">🎯</div>
             <div>
               <div className="text-2xl font-bold text-teal-400">
-                {Object.keys(stats.byCategory || {}).sort((a, b) =>
-                  (stats.byCategory[b] || 0) - (stats.byCategory[a] || 0)
-                )[0] || 'Balanced'}
+                {Object.keys(stats.byCategory || {}).sort((a, b) => {
+                  const categoryA = a as keyof typeof stats.byCategory;
+                  const categoryB = b as keyof typeof stats.byCategory;
+                  return (stats.byCategory[categoryB] || 0) - (stats.byCategory[categoryA] || 0);
+                })[0] || 'Balanced'}
               </div>
               <div className="text-xs text-gray-500">
                 {stats.byCategory.Security || 0} security, {stats.byCategory.Feature || 0} features
