@@ -71,10 +71,14 @@ async function fetchQueryResults(project: string, queryId: string) {
       }
     });
 
+    console.log(`Query response for ${project}:`, JSON.stringify(queryResponse.data).substring(0, 500));
+
     const workItemRefs = queryResponse.data.workItems || [];
 
     if (workItemRefs.length === 0) {
-      console.log(`No work items found for query ${queryId} in project ${project}`);
+      console.log(`⚠️ No work items found for query ${queryId} in project ${project}`);
+      console.log(`Response keys:`, Object.keys(queryResponse.data));
+      console.log(`Full response:`, JSON.stringify(queryResponse.data));
       return [];
     }
 

@@ -13,9 +13,13 @@ interface RefreshModalProps {
   onClose: () => void;
   onConfirm: (selection: ProjectSelection) => Promise<void>;
   isRefreshing: boolean;
+  importStats?: {
+    ticketsImported: number;
+    byProject: Record<string, number>;
+  };
 }
 
-export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing }: RefreshModalProps) {
+export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing, importStats }: RefreshModalProps) {
   const [selection, setSelection] = useState<ProjectSelection>({
     byteLos: true,
     byte: true,
@@ -166,13 +170,56 @@ export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing 
           </div>
 
           {/* Warning if none selected */}
-          {noneSelected && (
+          {noneSelected && !isRefreshing && (
             <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
               <div className="flex items-center gap-2 text-amber-400 text-sm">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 <span>Please select at least one project to import</span>
+              </div>
+            </div>
+          )}
+
+          {/* Import Progress */}
+          {isRefreshing && (
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="animate-spin h-5 w-5 text-blue-400 mt-0.5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <div className="flex-1 text-sm">
+                  <div className="text-blue-400 font-medium mb-2">Importing from Azure DevOps...</div>
+                  <div className="space-y-1 text-gray-400">
+                    {selection.byteLos && <div>• Fetching Byte LOS work items...</div>}
+                    {selection.byte && <div>• Fetching BYTE work items...</div>}
+                    {selection.productMasters && <div>• Fetching Product Masters work items...</div>}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    This may take 10-30 seconds depending on the number of work items
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Import Success */}
+          {!isRefreshing && importStats && importStats.ticketsImported > 0 && (
+            <div className="p-4 bg-teal-500/10 border border-teal-500/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-teal-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="flex-1 text-sm">
+                  <div className="text-teal-400 font-medium mb-2">Import Successful!</div>
+                  <div className="space-y-1 text-gray-300">
+                    <div className="font-semibold">Total: {importStats.ticketsImported} tickets imported</div>
+                    {Object.entries(importStats.byProject).map(([project, count]) => (
+                      <div key={project} className="text-xs">• {project}: {count} tickets</div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}

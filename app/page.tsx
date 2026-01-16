@@ -20,6 +20,7 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showRefreshModal, setShowRefreshModal] = useState(false);
+  const [importStats, setImportStats] = useState<any>(null);
 
   const loadData = async () => {
     try {
@@ -41,10 +42,16 @@ export default function Home() {
     try {
       setRefreshing(true);
       setError(null);
+      setImportStats(null);
       const result = await refreshData(selection);
       if (result.success) {
+        setImportStats(result.stats);
         await loadData();
-        setShowRefreshModal(false);
+        // Keep modal open to show success message for 3 seconds
+        setTimeout(() => {
+          setShowRefreshModal(false);
+          setImportStats(null);
+        }, 3000);
       }
     } catch (err: any) {
       setError(err.message);
@@ -163,6 +170,7 @@ export default function Home() {
           onClose={() => !refreshing && setShowRefreshModal(false)}
           onConfirm={handleRefresh}
           isRefreshing={refreshing}
+          importStats={importStats}
         />
       </div>
     </main>
