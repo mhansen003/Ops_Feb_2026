@@ -23,7 +23,8 @@ export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing,
   const [selection, setSelection] = useState<ProjectSelection>({
     byteLos: true,
     byte: true,
-    productMasters: true
+    productMasters: true,
+    includeCompleted: false
   });
 
   if (!isOpen) return null;
@@ -167,6 +168,30 @@ export default function RefreshModal({ isOpen, onClose, onConfirm, isRefreshing,
                 </div>
               </label>
             </div>
+          </div>
+
+          {/* Include Completed Items Option */}
+          <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={selection.includeCompleted}
+                onChange={(e) => setSelection({ ...selection, includeCompleted: e.target.checked })}
+                disabled={isRefreshing}
+                className="w-5 h-5 rounded border-2 border-gray-600 bg-gray-800 checked:bg-amber-500 checked:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              />
+              <div className="flex-1">
+                <div className="font-semibold text-white group-hover:text-amber-400 transition-colors">
+                  Include Completed Items
+                </div>
+                <div className="text-xs text-gray-500">
+                  Import Done/Cancelled/Closed items (~1,375 additional items)
+                </div>
+              </div>
+              <div className="text-xs font-mono px-2 py-1 bg-amber-500/20 text-amber-400 rounded">
+                HIST
+              </div>
+            </label>
           </div>
 
           {/* Warning if none selected */}

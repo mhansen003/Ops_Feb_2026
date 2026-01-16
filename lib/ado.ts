@@ -35,6 +35,7 @@ export interface ProjectSelection {
   byteLos: boolean;
   byte: boolean;
   productMasters: boolean;
+  includeCompleted?: boolean;
 }
 
 const allQueries: ADOQuery[] = [
@@ -182,7 +183,7 @@ export async function fetchAllADOTickets(selection?: ProjectSelection) {
   }
 
   // Transform to our ticket format
-  const tickets = Array.from(uniqueWorkItems.values())
+  let tickets = Array.from(uniqueWorkItems.values())
     .filter(item => item.id) // Filter out items without valid IDs
     .map(item => {
       const fields = item.fields;
@@ -206,6 +207,20 @@ export async function fetchAllADOTickets(selection?: ProjectSelection) {
         state: fields['System.State']
       };
     });
+
+  // Filter out completed items unless explicitly requested
+  if (!effectiveSelection.includeCompleted) {
+    const excludedStates = ['done', 'closed', 'completed', 'cancelled', 'removed', 'retired'];
+    const beforeCount = tickets.length;
+
+    tickets = tickets.filter(ticket => {
+      const stateLower = ticket.state.toLowerCase();
+      return !excludedStates.some(excluded => stateLower.includes(excluded));
+    });
+
+    const filteredCount = beforeCount - tickets.length;
+    console.log(`Filtered out ${filteredCount} completed/cancelled items (${tickets.length} active items remaining)`);
+  }
 
   return {
     tickets,

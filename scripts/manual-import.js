@@ -139,7 +139,7 @@ async function importData() {
   console.log(`📊 Unique work items after deduplication: ${uniqueWorkItems.size}`);
 
   // Transform to ticket format
-  const tickets = Array.from(uniqueWorkItems.values())
+  let tickets = Array.from(uniqueWorkItems.values())
     .filter(item => item.id) // Filter out items without valid IDs
     .map(item => {
       const fields = item.fields;
@@ -162,6 +162,23 @@ async function importData() {
         state: fields['System.State']
       };
     });
+
+  // Filter out completed items by default (set to true to include them)
+  const includeCompleted = false;
+
+  if (!includeCompleted) {
+    const excludedStates = ['done', 'closed', 'completed', 'cancelled', 'removed', 'retired'];
+    const beforeCount = tickets.length;
+
+    tickets = tickets.filter(ticket => {
+      const stateLower = ticket.state.toLowerCase();
+      return !excludedStates.some(excluded => stateLower.includes(excluded));
+    });
+
+    const filteredCount = beforeCount - tickets.length;
+    console.log(`\n🔍 Filtered out ${filteredCount} completed/cancelled items`);
+    console.log(`📊 Active items remaining: ${tickets.length}`);
+  }
 
   console.log(`\n🗄️ Clearing existing tickets...`);
   await sql`DELETE FROM tickets`;
