@@ -33,12 +33,11 @@ export default function Calendar({ tickets }: CalendarProps) {
     return acc;
   }, {} as Record<string, typeof tickets>);
 
-  // Get date range (last 3 months to next 2 months)
+  // Get date range (last 90 days)
   const today = new Date();
   const startDate = new Date(today);
-  startDate.setMonth(startDate.getMonth() - 3);
+  startDate.setDate(startDate.getDate() - 90);
   const endDate = new Date(today);
-  endDate.setMonth(endDate.getMonth() + 2);
 
   // Generate all dates in range
   const allDates: Date[] = [];
