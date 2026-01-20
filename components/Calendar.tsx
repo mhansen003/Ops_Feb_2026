@@ -137,6 +137,21 @@ export default function Calendar({ tickets }: CalendarProps) {
     }
   }
 
+  // Calculate month labels for each week
+  const monthLabels = weeks.map(week => {
+    const firstDate = week[0];
+    if (!firstDate) return null;
+
+    // Show month label if this is the first week of the month or first week overall
+    const isFirstWeek = weeks[0] === week;
+    const isNewMonth = isFirstWeek || firstDate.getDate() <= 7;
+
+    if (isNewMonth) {
+      return firstDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    }
+    return null;
+  });
+
   // Calculate upcoming due tickets
   const upcomingDueTickets = tickets.filter(t => {
     const dueDate = new Date(t.targetDate);
@@ -243,6 +258,18 @@ export default function Calendar({ tickets }: CalendarProps) {
         {/* Calendar Grid */}
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full">
+            {/* Month Labels */}
+            <div className="flex gap-3 mb-2">
+              <div className="w-16"></div>
+              <div className="flex gap-2">
+                {monthLabels.map((label, index) => (
+                  <div key={index} className="text-xs font-semibold text-gray-300" style={{ width: '24px' }}>
+                    {label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Day Labels */}
             <div className="flex gap-3">
               <div className="flex flex-col gap-2 text-xs text-gray-400 justify-around py-1 w-16">
@@ -283,15 +310,30 @@ export default function Calendar({ tickets }: CalendarProps) {
                         ? `${date.toLocaleDateString()}: ${createdCount} created`
                         : `${date.toLocaleDateString()}: ${dueCount} due`;
 
+                      // Show date label for first day of week or first of month
+                      const showDateLabel = dayOfWeek === 0 || date.getDate() === 1;
+
                       return (
                         <div
                           key={dayOfWeek}
-                          className={`w-6 h-6 rounded cursor-pointer transition-all hover:ring-2 hover:ring-teal-400 ${intensity} ${
-                            selectedDate === dateStr ? 'ring-2 ring-blue-400' : ''
-                          }`}
+                          className="relative group"
                           onClick={() => setSelectedDate(dateStr)}
-                          title={tooltip}
-                        />
+                        >
+                          <div
+                            className={`w-6 h-6 rounded cursor-pointer transition-all hover:ring-2 hover:ring-teal-400 ${intensity} ${
+                              selectedDate === dateStr ? 'ring-2 ring-blue-400' : ''
+                            }`}
+                            title={tooltip}
+                          />
+                          {showDateLabel && (
+                            <div className="absolute -top-5 left-0 text-[9px] font-medium text-gray-400 whitespace-nowrap">
+                              {date.getDate() === 1
+                                ? `${date.toLocaleDateString('en-US', { month: 'short' })} ${date.getDate()}`
+                                : date.getDate()
+                              }
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
