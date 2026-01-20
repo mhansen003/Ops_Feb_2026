@@ -118,15 +118,19 @@ export default function Calendar({ tickets }: CalendarProps) {
   const weeks: Date[][] = [];
   let currentWeek: Date[] = [];
 
-  // Start from Sunday
-  let weekStartIndex = 0;
-  while (weekStartIndex < allDates.length && allDates[weekStartIndex].getDay() !== 0) {
-    weekStartIndex++;
-  }
-
-  for (let i = weekStartIndex; i < allDates.length; i++) {
+  // Include all dates from the start, not just from first Sunday
+  for (let i = 0; i < allDates.length; i++) {
     const date = allDates[i];
+
+    // Start a new week on Sunday (unless it's the very first week)
+    if (date.getDay() === 0 && currentWeek.length > 0) {
+      weeks.push([...currentWeek]);
+      currentWeek = [];
+    }
+
     currentWeek.push(date);
+
+    // Close the week on Saturday or at the end
     if (date.getDay() === 6 || i === allDates.length - 1) {
       weeks.push([...currentWeek]);
       currentWeek = [];
@@ -240,8 +244,8 @@ export default function Calendar({ tickets }: CalendarProps) {
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full">
             {/* Day Labels */}
-            <div className="flex gap-2">
-              <div className="flex flex-col gap-1 text-xs text-gray-400 justify-around py-1 w-12">
+            <div className="flex gap-3">
+              <div className="flex flex-col gap-2 text-xs text-gray-400 justify-around py-1 w-16">
                 <span>Sun</span>
                 <span>Mon</span>
                 <span>Tue</span>
@@ -252,13 +256,13 @@ export default function Calendar({ tickets }: CalendarProps) {
               </div>
 
               {/* Heatmap Grid */}
-              <div className="flex gap-1">
+              <div className="flex gap-2">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-1">
+                  <div key={weekIndex} className="flex flex-col gap-2">
                     {[0, 1, 2, 3, 4, 5, 6].map(dayOfWeek => {
                       const date = week.find(d => d.getDay() === dayOfWeek);
                       if (!date) {
-                        return <div key={dayOfWeek} className="w-3 h-3"></div>;
+                        return <div key={dayOfWeek} className="w-6 h-6"></div>;
                       }
                       const dateStr = formatDate(date);
                       const createdCount = ticketsByCreatedDate[dateStr]?.length || 0;
@@ -282,7 +286,7 @@ export default function Calendar({ tickets }: CalendarProps) {
                       return (
                         <div
                           key={dayOfWeek}
-                          className={`w-3 h-3 rounded cursor-pointer transition-all hover:ring-2 hover:ring-teal-400 ${intensity} ${
+                          className={`w-6 h-6 rounded cursor-pointer transition-all hover:ring-2 hover:ring-teal-400 ${intensity} ${
                             selectedDate === dateStr ? 'ring-2 ring-blue-400' : ''
                           }`}
                           onClick={() => setSelectedDate(dateStr)}
