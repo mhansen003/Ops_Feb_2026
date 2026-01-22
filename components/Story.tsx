@@ -114,38 +114,6 @@ export default function Story({ tickets, stats }: StoryProps) {
         />
       </div>
 
-      {/* Capacity Analysis */}
-      <div className="card">
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
-          <span className="text-2xl">⏱️</span>
-          Capacity Reality Check
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 bg-amber-500/10 rounded-xl border border-amber-500/30">
-            <h4 className="font-semibold text-amber-400 mb-3">Current Projection</h4>
-            <div className="text-3xl font-bold text-white mb-2">9-27 months</div>
-            <p className="text-sm text-gray-400">
-              With 2 BAs and 2 Developers, assuming 1-3 week "Small" t-shirt sizing per item
-            </p>
-          </div>
-
-          <div className="p-6 bg-blue-500/10 rounded-xl border border-blue-500/30">
-            <h4 className="font-semibold text-blue-400 mb-3">New Submission Impact</h4>
-            <div className="text-3xl font-bold text-white mb-2">9+ months</div>
-            <p className="text-sm text-gray-400">
-              Any new items submitted today queue behind the existing backlog
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-          <p className="text-sm text-gray-300">
-            <span className="text-teal-400 font-semibold">Key Insight:</span> These estimates assume dedicated capacity without accounting for sprint overhead, testing, production support, or other competing priorities. BA capacity must support both active development work and future backlog refinement.
-          </p>
-        </div>
-      </div>
-
       {/* Team Recognition */}
       <div className="card">
         <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
