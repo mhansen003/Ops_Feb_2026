@@ -6,12 +6,13 @@ import Calendar from '@/components/Calendar';
 import TicketGrid from '@/components/TicketGrid';
 import CriticalQuestions from '@/components/CriticalQuestions';
 import Burndown from '@/components/Burndown';
+import Story from '@/components/Story';
 import { fetchTickets, type Ticket, type TicketStats } from '@/lib/data-client';
 
-type Tab = 'dashboard' | 'calendar' | 'tickets' | 'questions' | 'burndown';
+type Tab = 'story' | 'dashboard' | 'calendar' | 'tickets' | 'questions' | 'burndown';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+  const [activeTab, setActiveTab] = useState<Tab>('story');
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<TicketStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,7 @@ export default function Home() {
   }, []);
 
   const tabs = [
+    { id: 'story' as Tab, label: 'Story', icon: '📖' },
     { id: 'dashboard' as Tab, label: 'Dashboard', icon: '📊' },
     { id: 'burndown' as Tab, label: 'Burndown', icon: '📉' },
     { id: 'calendar' as Tab, label: 'Calendar', icon: '📅' },
@@ -102,6 +104,7 @@ export default function Home() {
             </div>
           ) : (
             <>
+              {activeTab === 'story' && <Story tickets={tickets} stats={stats!} />}
               {activeTab === 'dashboard' && <Dashboard tickets={tickets} stats={stats!} />}
               {activeTab === 'burndown' && <Burndown tickets={tickets} stats={stats!} />}
               {activeTab === 'calendar' && <Calendar tickets={tickets} />}
