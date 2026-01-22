@@ -53,7 +53,7 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
         details: highPriorityTickets.length > 0
           ? [
               ...highPriorityTickets.slice(0, 4).map(t =>
-                `${t.id}: ${t.title.substring(0, 60)}... [${t.priority}] - ${t.assignee}`
+                { return { ticketId: t.id, text: `${t.title.substring(0, 60)}... [${t.priority}] - ${t.assignee}` }; }
               ),
               highPriorityTickets.length > 4 ? `...and ${highPriorityTickets.length - 4} more high-priority items` : ''
             ].filter(Boolean)
@@ -100,7 +100,7 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
           : 'No currently blocked items. Good project flow!',
         details: blockedTickets.length > 0
           ? [
-              ...blockedTickets.slice(0, 3).map(t => `${t.id}: ${t.title.substring(0, 60)}... [${t.assignee}]`),
+              ...blockedTickets.slice(0, 3).map(t => { return { ticketId: t.id, text: `${t.title.substring(0, 60)}... [${t.assignee}]` }; }),
               blockedTickets.length > 3 ? `...and ${blockedTickets.length - 3} more blocked items` : '',
               onHoldTickets.length > 0 ? `${onHoldTickets.length} items on hold - review priorities` : 'No items on hold'
             ].filter(Boolean)
@@ -148,7 +148,7 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
         details: readyForReviewTickets.length > 0
           ? [
               ...readyForReviewTickets.slice(0, 4).map(t =>
-                `${t.id}: ${t.title.substring(0, 55)}... [${t.state}]`
+                { return { ticketId: t.id, text: `${t.title.substring(0, 55)}... [${t.state}]` }; }
               ),
               readyForReviewTickets.length > 4 ? `...and ${readyForReviewTickets.length - 4} more ready items` : ''
             ].filter(Boolean)
@@ -251,7 +251,14 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
                       {item.answer.details.map((detail, index) => (
                         <li key={index} className="flex items-start gap-2 text-sm text-gray-300">
                           <span className="text-teal-400 mt-1">▸</span>
-                          <span>{detail}</span>
+                          {typeof detail === 'object' && detail !== null && 'ticketId' in detail ? (
+                            <span>
+                              <TicketLink ticketId={(detail as { ticketId: string; text: string }).ticketId} className="font-mono" />
+                              : {(detail as { ticketId: string; text: string }).text}
+                            </span>
+                          ) : (
+                            <span>{detail as string}</span>
+                          )}
                         </li>
                       ))}
                     </ul>
