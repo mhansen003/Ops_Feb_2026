@@ -9,13 +9,13 @@ interface CalendarProps {
 }
 
 export default function Calendar({ tickets }: CalendarProps) {
-  const [selectedWeek, setSelectedWeek] = useState<number>(0);
+  const [selectedSprint, setSelectedSprint] = useState<number>(0);
 
   const today = new Date();
 
-  // Generate next 8 Wednesdays as release dates
-  const getNextWednesdays = (count: number): Date[] => {
-    const wednesdays: Date[] = [];
+  // Generate next 4 sprint end dates (3-week sprints, ending on Wednesday)
+  const getSprintEndDates = (count: number): Date[] => {
+    const sprintEnds: Date[] = [];
     const current = new Date(today);
 
     // Find the next Wednesday
@@ -24,14 +24,14 @@ export default function Calendar({ tickets }: CalendarProps) {
     }
 
     for (let i = 0; i < count; i++) {
-      wednesdays.push(new Date(current));
-      current.setDate(current.getDate() + 7);
+      sprintEnds.push(new Date(current));
+      current.setDate(current.getDate() + 21); // 3-week sprints
     }
 
-    return wednesdays;
+    return sprintEnds;
   };
 
-  const releaseWednesdays = getNextWednesdays(8);
+  const sprintEndDates = getSprintEndDates(4);
 
   // Get tickets ready for release (Ready for Review status)
   const readyForRelease = tickets.filter(t => t.status === 'Ready for Review');
@@ -49,37 +49,72 @@ export default function Calendar({ tickets }: CalendarProps) {
   const inQA = getTicketsByState('In QA');
   const inDev = getTicketsByState('In Dev');
   const bsaInProgress = getTicketsByState('BSA in Progress');
-  const gatheringRequirements = getTicketsByState('Gathering Requirements');
 
-  // Simulate projected release dates based on current state
-  const getProjectedReleaseWeek = (ticket: Ticket): number => {
-    // Estimate weeks until release based on ADO state
-    const stateWeekEstimates: Record<string, number> = {
+  // Simulate projected release sprint based on current state (adjusted for 3-week sprints)
+  const getProjectedSprint = (ticket: Ticket): number => {
+    // Estimate sprints until release based on ADO state
+    const stateSprintEstimates: Record<string, number> = {
       'Tuesday Release': 0,
       'Ready for Prod': 0,
       'Ready to Release with Clear': 0,
-      'In QA': 1,
-      'In Dev': 2,
-      'BSA in Progress': 3,
-      'Gathering Requirements': 4,
-      'Prioritized Backlog': 5,
-      'Ready for Grooming': 5,
-      'On Hold': 6,
-      'MISC': 6,
-      'New': 7,
+      'In QA': 0,           // Current sprint
+      'In Dev': 1,          // Next sprint
+      'BSA in Progress': 1, // Next sprint
+      'Gathering Requirements': 2,
+      'Prioritized Backlog': 2,
+      'Ready for Grooming': 2,
+      'On Hold': 3,
+      'MISC': 3,
+      'New': 3,
     };
 
-    return stateWeekEstimates[ticket.state || ''] ?? 6;
+    return stateSprintEstimates[ticket.state || ''] ?? 3;
   };
 
-  // Group tickets by projected release week
-  const ticketsByReleaseWeek = releaseWednesdays.map((_, weekIndex) => {
+  // Group tickets by projected sprint
+  const ticketsBySprint = sprintEndDates.map((_, sprintIndex) => {
     return tickets.filter(t => {
       if (t.status === 'Completed') return false;
-      const projectedWeek = getProjectedReleaseWeek(t);
-      return projectedWeek === weekIndex;
+      const projectedSprint = getProjectedSprint(t);
+      return projectedSprint === sprintIndex;
     });
   });
+
+  // Get color based on priority
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'Critical': return { bg: 'bg-rose-500/20', border: 'border-rose-500/50', text: 'text-rose-400', dot: 'bg-rose-500' };
+      case 'High': return { bg: 'bg-amber-500/20', border: 'border-amber-500/50', text: 'text-amber-400', dot: 'bg-amber-500' };
+      case 'Medium': return { bg: 'bg-blue-500/20', border: 'border-blue-500/50', text: 'text-blue-400', dot: 'bg-blue-500' };
+      case 'Low': return { bg: 'bg-teal-500/20', border: 'border-teal-500/50', text: 'text-teal-400', dot: 'bg-teal-500' };
+      default: return { bg: 'bg-gray-500/20', border: 'border-gray-500/50', text: 'text-gray-400', dot: 'bg-gray-500' };
+    }
+  };
+
+  // Get color based on state
+  const getStateColor = (state: string) => {
+    switch (state) {
+      case 'Tuesday Release':
+      case 'Ready for Prod':
+      case 'Ready to Release with Clear':
+        return 'text-green-400 bg-green-500/20';
+      case 'In QA':
+        return 'text-purple-400 bg-purple-500/20';
+      case 'In Dev':
+        return 'text-blue-400 bg-blue-500/20';
+      case 'BSA in Progress':
+        return 'text-cyan-400 bg-cyan-500/20';
+      case 'Gathering Requirements':
+        return 'text-amber-400 bg-amber-500/20';
+      case 'On Hold':
+        return 'text-red-400 bg-red-500/20';
+      case 'Prioritized Backlog':
+      case 'Ready for Grooming':
+        return 'text-gray-400 bg-gray-500/20';
+      default:
+        return 'text-gray-400 bg-gray-500/20';
+    }
+  };
 
   // Format date for display
   const formatDate = (date: Date) => {
@@ -98,14 +133,21 @@ export default function Calendar({ tickets }: CalendarProps) {
     });
   };
 
+  // Calculate sprint start date (3 weeks before end)
+  const getSprintStartDate = (endDate: Date) => {
+    const start = new Date(endDate);
+    start.setDate(start.getDate() - 20); // 3 weeks minus 1 day
+    return start;
+  };
+
   return (
     <div className="space-y-6">
       {/* Release Schedule Header */}
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold">Wednesday Release Schedule</h2>
-            <p className="text-gray-400 mt-1">Releases occur every Wednesday</p>
+            <h2 className="text-2xl font-bold">3-Week Sprint Schedule</h2>
+            <p className="text-gray-400 mt-1">Sprint releases occur every 3 weeks on Wednesday</p>
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold text-green-400">{readyForRelease.length}</div>
@@ -113,35 +155,44 @@ export default function Calendar({ tickets }: CalendarProps) {
           </div>
         </div>
 
-        {/* Upcoming Releases Timeline */}
+        {/* Upcoming Sprints Timeline */}
         <div className="overflow-x-auto">
           <div className="flex gap-4 min-w-max pb-4">
-            {releaseWednesdays.map((wednesday, index) => {
-              const isNextRelease = index === 0;
-              const daysUntil = Math.ceil((wednesday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            {sprintEndDates.map((endDate, index) => {
+              const isCurrentSprint = index === 0;
+              const startDate = getSprintStartDate(endDate);
+              const daysUntil = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              const sprintTicketCount = ticketsBySprint[index]?.length || 0;
 
               return (
                 <button
                   key={index}
-                  onClick={() => setSelectedWeek(index)}
-                  className={`flex-shrink-0 p-4 rounded-lg border-2 transition-all ${
-                    selectedWeek === index
+                  onClick={() => setSelectedSprint(index)}
+                  className={`flex-shrink-0 p-4 rounded-lg border-2 transition-all min-w-[160px] ${
+                    selectedSprint === index
                       ? 'border-blue-500 bg-blue-500/20'
-                      : isNextRelease
+                      : isCurrentSprint
                       ? 'border-green-500/50 bg-green-500/10 hover:border-green-500'
                       : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
                   }`}
                 >
                   <div className="text-center">
-                    <div className={`text-lg font-bold ${isNextRelease ? 'text-green-400' : 'text-white'}`}>
-                      {formatShortDate(wednesday)}
+                    <div className="text-xs text-gray-500 mb-1">Sprint {index + 1}</div>
+                    <div className={`text-sm font-bold ${isCurrentSprint ? 'text-green-400' : 'text-white'}`}>
+                      {formatShortDate(startDate)} - {formatShortDate(endDate)}
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
-                      {daysUntil === 0 ? 'Today!' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil} days`}
+                      {daysUntil <= 0 ? 'Ending today!' : daysUntil === 1 ? '1 day left' : `${daysUntil} days left`}
                     </div>
-                    {isNextRelease && (
+                    <div className="mt-2 flex items-center justify-center gap-2">
+                      <span className={`text-lg font-bold ${sprintTicketCount > 0 ? 'text-white' : 'text-gray-600'}`}>
+                        {sprintTicketCount}
+                      </span>
+                      <span className="text-xs text-gray-500">items</span>
+                    </div>
+                    {isCurrentSprint && (
                       <div className="mt-2 text-xs px-2 py-1 bg-green-500/30 text-green-300 rounded">
-                        Next Release
+                        Current Sprint
                       </div>
                     )}
                   </div>
@@ -157,13 +208,13 @@ export default function Calendar({ tickets }: CalendarProps) {
         <PipelineCard
           title="Tuesday Release"
           count={tuesdayRelease.length}
-          color="bg-purple-500"
-          description="Scheduled for release"
+          color="bg-green-500"
+          description="Shipping this release"
         />
         <PipelineCard
           title="Ready to Release"
           count={readyToReleaseWithClear.length}
-          color="bg-green-500"
+          color="bg-emerald-500"
           description="Cleared and ready"
         />
         <PipelineCard
@@ -175,29 +226,59 @@ export default function Calendar({ tickets }: CalendarProps) {
         <PipelineCard
           title="In QA"
           count={inQA.length}
-          color="bg-blue-500"
+          color="bg-purple-500"
           description="Testing in progress"
         />
         <PipelineCard
           title="In Dev"
           count={inDev.length}
-          color="bg-amber-500"
+          color="bg-blue-500"
           description="Development active"
         />
       </div>
 
-      {/* Selected Release Week Details */}
+      {/* Color Legend */}
       <div className="card">
-        <h3 className="text-xl font-semibold mb-4">
-          Release: {formatDate(releaseWednesdays[selectedWeek])}
-        </h3>
+        <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">Priority Color Legend</h4>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-rose-500"></div>
+            <span className="text-sm text-gray-300">Critical</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+            <span className="text-sm text-gray-300">High</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            <span className="text-sm text-gray-300">Medium</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-teal-500"></div>
+            <span className="text-sm text-gray-300">Low</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Selected Sprint Details */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold">
+            Sprint {selectedSprint + 1}: {formatShortDate(getSprintStartDate(sprintEndDates[selectedSprint]))} - {formatDate(sprintEndDates[selectedSprint])}
+          </h3>
+          {selectedSprint === 0 && (
+            <span className="text-xs px-3 py-1 bg-green-500/30 text-green-300 rounded-full">
+              Current Sprint
+            </span>
+          )}
+        </div>
 
         {(() => {
-          const weekTickets = ticketsByReleaseWeek[selectedWeek] || [];
-          const isCurrentRelease = selectedWeek === 0;
+          const sprintTickets = ticketsBySprint[selectedSprint] || [];
+          const isCurrentSprint = selectedSprint === 0;
 
           // Sort by priority
-          const sortedTickets = [...weekTickets].sort((a, b) => {
+          const sortedTickets = [...sprintTickets].sort((a, b) => {
             const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
             return priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
           });
@@ -206,59 +287,51 @@ export default function Calendar({ tickets }: CalendarProps) {
             <>
               <div className="flex items-center justify-between mb-4">
                 <p className="text-gray-400">
-                  {isCurrentRelease
-                    ? 'Items ready for the next Wednesday release:'
-                    : `Projected items for this release (${weekTickets.length} tickets):`}
+                  {isCurrentSprint
+                    ? `Items targeted for current sprint release (${sprintTickets.length} tickets):`
+                    : `Projected items for Sprint ${selectedSprint + 1} (${sprintTickets.length} tickets):`}
                 </p>
-                {!isCurrentRelease && weekTickets.length > 0 && (
-                  <span className="text-xs px-2 py-1 bg-amber-500/20 text-amber-400 rounded">
-                    Projected
-                  </span>
-                )}
               </div>
 
               {sortedTickets.length > 0 ? (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                  {sortedTickets.map(ticket => (
-                    <div
-                      key={ticket.id}
-                      className={`p-4 rounded-lg border ${
-                        isCurrentRelease
-                          ? 'bg-green-500/10 border-green-500/30'
-                          : 'bg-amber-500/10 border-amber-500/30'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <TicketLink ticketId={ticket.id} className="text-sm font-mono" />
-                            <span className={`badge badge-${ticket.priority.toLowerCase()}`}>
-                              {ticket.priority}
-                            </span>
-                            <span className="text-xs text-blue-400">{ticket.state}</span>
+                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                  {sortedTickets.map(ticket => {
+                    const priorityColor = getPriorityColor(ticket.priority);
+                    const stateColor = getStateColor(ticket.state || '');
+
+                    return (
+                      <div
+                        key={ticket.id}
+                        className={`p-4 rounded-lg border-l-4 ${priorityColor.bg} ${priorityColor.border} hover:brightness-110 transition-all`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`w-2 h-2 rounded-full ${priorityColor.dot}`}></div>
+                              <TicketLink ticketId={ticket.id} className="text-sm font-mono" />
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded ${priorityColor.bg} ${priorityColor.text}`}>
+                                {ticket.priority}
+                              </span>
+                              <span className={`text-xs px-2 py-0.5 rounded ${stateColor}`}>
+                                {ticket.state}
+                              </span>
+                            </div>
+                            <h4 className="font-semibold text-white mb-1">{ticket.title}</h4>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>👤 {ticket.assignee}</span>
+                              <span>📅 {ticket.createdDate}</span>
+                            </div>
                           </div>
-                          <h4 className="font-semibold text-white mb-1">{ticket.title}</h4>
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>👤 {ticket.assignee}</span>
-                            <span>📅 Created: {ticket.createdDate}</span>
-                          </div>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          isCurrentRelease
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-amber-500/20 text-amber-400'
-                        }`}>
-                          {isCurrentRelease ? 'Ready' : 'Projected'}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  {isCurrentRelease
-                    ? 'No items currently ready for release'
-                    : 'No items projected for this release window'}
+                  {isCurrentSprint
+                    ? 'No items currently targeted for this sprint'
+                    : 'No items projected for this sprint window'}
                 </div>
               )}
             </>
@@ -270,35 +343,40 @@ export default function Calendar({ tickets }: CalendarProps) {
       <div className="card">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
           ⚡ In Progress ({inProgress.length})
-          <span className="text-sm font-normal text-gray-400">- Potential upcoming releases</span>
+          <span className="text-sm font-normal text-gray-400">- Active development</span>
         </h3>
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
-          {inProgress.slice(0, 15).map(ticket => (
-            <div
-              key={ticket.id}
-              className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/30"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <TicketLink ticketId={ticket.id} className="text-sm font-mono" />
-                    <span className={`badge badge-${ticket.priority.toLowerCase()}`}>
-                      {ticket.priority}
-                    </span>
-                    <span className="text-xs text-amber-400">{ticket.state}</span>
+          {inProgress.slice(0, 15).map(ticket => {
+            const priorityColor = getPriorityColor(ticket.priority);
+            const stateColor = getStateColor(ticket.state || '');
+
+            return (
+              <div
+                key={ticket.id}
+                className={`p-4 rounded-lg border-l-4 ${priorityColor.bg} ${priorityColor.border}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`w-2 h-2 rounded-full ${priorityColor.dot}`}></div>
+                      <TicketLink ticketId={ticket.id} className="text-sm font-mono" />
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded ${priorityColor.bg} ${priorityColor.text}`}>
+                        {ticket.priority}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded ${stateColor}`}>
+                        {ticket.state}
+                      </span>
+                    </div>
+                    <h4 className="font-semibold text-white mb-1">{ticket.title}</h4>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>👤 {ticket.assignee}</span>
+                      <span>📅 {ticket.createdDate}</span>
+                    </div>
                   </div>
-                  <h4 className="font-semibold text-white mb-1">{ticket.title}</h4>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span>👤 {ticket.assignee}</span>
-                    <span>📅 Created: {ticket.createdDate}</span>
-                  </div>
-                </div>
-                <div className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
-                  {ticket.status}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {inProgress.length > 15 && (
             <p className="text-center text-gray-500 py-2">
               +{inProgress.length - 15} more items in progress
