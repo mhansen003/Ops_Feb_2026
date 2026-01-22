@@ -47,45 +47,48 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen p-8">
-      <div className="max-w-[1600px] mx-auto">
-        {/* Header */}
-        <header className="mb-8 fade-in">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold mb-2 gradient-text">
-                Byte Backlog
-              </h1>
-              <div className="space-y-1">
-                <p className="text-lg text-gray-400">
+    <main className="min-h-screen">
+      {/* Sticky Header + Tabs */}
+      <div className="sticky top-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
+        <div className="max-w-[1600px] mx-auto px-8">
+          {/* Header */}
+          <header className="py-4 fade-in">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold gradient-text">
+                  Byte Backlog
+                </h1>
+                <p className="text-sm text-gray-400">
                   Stack Ranked - January 2026
-                  {stats && <span className="ml-4 text-sm">({stats.total} tickets)</span>}
+                  {stats && <span className="ml-2">({stats.total} tickets)</span>}
                 </p>
               </div>
             </div>
-          </div>
-          {error && (
-            <div className="mt-4 p-4 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">
-              ⚠️ Error: {error}
-            </div>
-          )}
-        </header>
+            {error && (
+              <div className="mt-2 p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400 text-sm">
+                ⚠️ Error: {error}
+              </div>
+            )}
+          </header>
 
-        {/* Tab Navigation */}
-        <nav className="tab-nav slide-in">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-            >
-              <span className="mr-2">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+          {/* Tab Navigation */}
+          <nav className="tab-nav slide-in pb-4">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
 
-        {/* Content Area */}
+      {/* Content Area */}
+      <div className="max-w-[1600px] mx-auto px-8 py-6">
         <div className="fade-in">
           {loading ? (
             <div className="flex items-center justify-center py-20">
