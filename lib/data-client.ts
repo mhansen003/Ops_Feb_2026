@@ -15,6 +15,7 @@ export interface Ticket {
   workItemType?: string;
   state?: string;
   requestor?: string;
+  aiRecommendation?: string;
 }
 
 export interface TicketStats {
@@ -60,6 +61,7 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
     workItemType: t.work_item_type,
     state: t.state,
     requestor: t.requestor,
+    aiRecommendation: t.ai_recommendation,
   }));
 
   // Use stats from API (already calculated server-side)

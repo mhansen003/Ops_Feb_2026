@@ -1,5 +1,6 @@
 // Auto-generated from Byte Backlog Stack Ranked Jan_2026.xlsx
 // Last updated: January 2026
+// AI Recommendations added: January 2026
 
 export interface BacklogTicket {
   id: string;
@@ -14,6 +15,7 @@ export interface BacklogTicket {
   state: string;
   requestor: string;
   tags: string[];
+  aiRecommendation: string;
 }
 
 export const backlogTickets: BacklogTicket[] = [
@@ -29,7 +31,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Ready to Release with Clear",
     "requestor": "Lissa Park",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ AGING: 21+ months old. Ready for release - include in next Wednesday deployment. Consider priority bump if still business-critical after this long."
   },
   {
     "id": "22164",
@@ -43,7 +46,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Ready to Release with Clear",
     "requestor": "Debbi Hundley",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ COMPLIANCE RISK: WV regulatory hardstop pending 21+ months. Deploy immediately - potential compliance exposure."
   },
   {
     "id": "46854",
@@ -57,7 +61,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Tuesday Release",
     "requestor": "Paula Leber",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "✅ READY: Scheduled for Tuesday release. Verify QA sign-off complete and release notes prepared."
   },
   {
     "id": "53508",
@@ -71,7 +76,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Projects",
     "requestor": "KMattox@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📊 PROJECT: High priority, 11 months in Projects state. Request status update from Aaron. Consider breaking into smaller deliverables."
   },
   {
     "id": "56548",
@@ -85,7 +91,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In QA",
     "requestor": "Amanda Lewis",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🧪 IN QA: Track QA completion. Expected release within 1-2 weeks if testing passes."
   },
   {
     "id": "58307",
@@ -99,7 +106,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In QA",
     "requestor": "mbaetzel@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🧪 HIGH PRIORITY IN QA: eNote/RON is industry-critical. Expedite testing. Consider dedicated QA resource."
   },
   {
     "id": "60402",
@@ -113,7 +121,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In QA",
     "requestor": "Dave Herbst",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🧪 HIGH PRIORITY IN QA: Major AIO screen update. Coordinate with related AIO tickets (92240, 92908) for unified testing."
   },
   {
     "id": "61917",
@@ -127,7 +136,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In Dev",
     "requestor": "Colleen Schofield",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "👍 ON TRACK: Low priority in dev. No immediate action needed."
   },
   {
     "id": "62369",
@@ -141,7 +151,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Tuesday Release",
     "requestor": "agledhill@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "✅ READY: Scheduled for Tuesday release. Ensure regression testing for popup logic complete."
   },
   {
     "id": "66076",
@@ -155,7 +166,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Gathering Requirements",
     "requestor": "nlindstrom@cmghomeloans.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏳ STALLED: 8 months gathering requirements. Schedule stakeholder meeting with nlindstrom to finalize specs."
   },
   {
     "id": "66212",
@@ -169,7 +181,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Ready for Prod",
     "requestor": "kgriffin@cmghomeloans.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "✅ DEPLOY: Ready for Prod. Include in next release. Policy alignment is time-sensitive."
   },
   {
     "id": "69749",
@@ -183,7 +196,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Ready to Release with Clear",
     "requestor": "kgriffin@cmghomeloans.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ INVESTOR COMPLIANCE: Chase product restriction ready. Deploy ASAP to prevent investor buyback risk."
   },
   {
     "id": "72938",
@@ -197,7 +211,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "MISC",
     "requestor": "nlindstrom@cmghomeloans.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 TRIAGE NEEDED: 6 months in MISC state. Clarify scope with Shannon and move to proper workflow."
   },
   {
     "id": "74328",
@@ -211,7 +226,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In QA",
     "requestor": "lforconi@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🧪 IN QA: IPC calculation is critical for CAP program. Prioritize QA completion."
   },
   {
     "id": "75314",
@@ -225,7 +241,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In QA",
     "requestor": "lforconi@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🧪 HIGH PRIORITY IN QA: Self-employed processing critical for CAP. Fast-track QA validation."
   },
   {
     "id": "76214",
@@ -239,7 +256,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In Dev",
     "requestor": "kgriffin@cmghomeloans.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "👍 ON TRACK: DSCR hardstop in development. Verify alignment with investor guidelines."
   },
   {
     "id": "77249",
@@ -253,7 +271,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Gathering Requirements",
     "requestor": "rperrault@cmgfi.com/Jenn Houston",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏳ REQUIREMENTS: 4+ months gathering requirements. Schedule finalization meeting. Renee is also requestor - clarify ownership."
   },
   {
     "id": "78114",
@@ -267,7 +286,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "Ready for Prod",
     "requestor": "csmothers@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "✅ DEPLOY: Ready for Prod. Also update training materials in coordination with release."
   },
   {
     "id": "78632",
@@ -281,7 +301,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "New",
     "requestor": "apaulsen@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 NEW: Assign and begin requirements. PDF support is standard investor requirement."
   },
   {
     "id": "79086",
@@ -295,7 +316,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "MISC",
     "requestor": "claudineb@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🚨 ACTION REQUIRED: High priority new product stuck in MISC 4 months. Escalate - Bridge product launch may be blocked."
   },
   {
     "id": "79335",
@@ -309,7 +331,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "In Dev",
     "requestor": "sierram@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "👍 ON TRACK: Email notifications in development. Standard progress."
   },
   {
     "id": "79484",
@@ -323,7 +346,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "Byte Request",
     "state": "New",
     "requestor": "tcrounse@cmgfi.com",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔴 UNASSIGNED: 4 months without owner. Assign immediately - JV solution may have partnership deadlines."
   },
   {
     "id": "46847",
@@ -337,7 +361,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ LONG BSA: 11 months in BSA. High priority construction feature blocked. Escalate business decision or descope."
   },
   {
     "id": "65701",
@@ -351,7 +376,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ PRICING WORKFLOW: 8 months in BSA. COC/Points impacts revenue. Prioritize business requirements finalization."
   },
   {
     "id": "72957",
@@ -365,7 +391,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 BACKLOG: Aaron has heavy workload. Consider reassignment or sprint planning."
   },
   {
     "id": "73860",
@@ -379,7 +406,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔴 UNASSIGNED HIGH: Access control is security-sensitive. Assign owner immediately and prioritize."
   },
   {
     "id": "74085",
@@ -393,7 +421,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 COMPLIANCE: Low priority but compliance-related. Monitor for regulatory deadline changes."
   },
   {
     "id": "74762",
@@ -407,7 +436,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔴 UNASSIGNED: Servicing automation without owner 5 months. Assign to servicing-focused developer."
   },
   {
     "id": "76231",
@@ -421,7 +451,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ STATE COMPLIANCE: NY tax stamps is regulatory. 5 months in BSA - expedite requirements to avoid compliance gap."
   },
   {
     "id": "77598",
@@ -435,7 +466,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 PIPELINE: Review original ticket #634135 for context. May be related to COC workflow item 65701."
   },
   {
     "id": "78426",
@@ -449,7 +481,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ ON HOLD: Document hold reason. DPA programs may have funding partner deadlines."
   },
   {
     "id": "78573",
@@ -463,7 +496,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏳ BSA: Credit vendor integration 4 months in BSA. Verify vendor API timeline alignment."
   },
   {
     "id": "78671",
@@ -477,7 +511,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔴 UNASSIGNED HIGH: Post closing conditions critical for investor delivery. Assign and begin requirements ASAP."
   },
   {
     "id": "78917",
@@ -491,7 +526,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ PRIORITY MISMATCH: Title says URGENT but priority is Low. Review and adjust priority if still urgent."
   },
   {
     "id": "81479",
@@ -505,7 +541,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ HIGH ON HOLD: PPP override is high priority but blocked. Escalate - document blocker and timeline to resume."
   },
   {
     "id": "81505",
@@ -519,7 +556,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ HFA PROGRAM: State HFA fee mapping affects affordable lending. Push for requirements completion."
   },
   {
     "id": "81508",
@@ -533,7 +571,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ UNASSIGNED + ON HOLD: Needs owner before hold can be resolved. Assign or close if no longer needed."
   },
   {
     "id": "81528",
@@ -547,7 +586,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 INTEGRATION: ValueLink integration item. Coordinate with vendor on API availability."
   },
   {
     "id": "81621",
@@ -561,7 +601,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 LOW: Nice-to-have feature. Keep in backlog until higher priorities addressed."
   },
   {
     "id": "81789",
@@ -575,7 +616,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🏦 STRATEGIC: Bank wholesale channel is major initiative. Track closely - coordinate with bank partnership team."
   },
   {
     "id": "84372",
@@ -589,7 +631,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📈 MARKET TREND: Assumption loans increasing in high-rate environment. Consider priority bump."
   },
   {
     "id": "85172",
@@ -603,7 +646,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ PRIVACY COMPLIANCE: Borrower opt-out is regulatory requirement. Expedite BSA - potential CCPA/GLBA exposure."
   },
   {
     "id": "85773",
@@ -617,7 +661,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 UX: Document expiration visibility improves ops efficiency. Schedule when Renee's workload allows."
   },
   {
     "id": "85961",
@@ -631,12 +676,13 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔒 ACCESS CONFLICT: File locking issue impacts QC workflow. May need architecture review."
   },
   {
     "id": "86014",
-    "title": "Byte / Doc Vendor | Product / Credit: FHA ARM \u2013 Byte Not Updating First Rate Payment Date Correctly",
-    "description": "Byte / Doc Vendor | Product / Credit: FHA ARM \u2013 Byte Not Updating First Rate Payment Date Correctly",
+    "title": "Byte / Doc Vendor | Product / Credit: FHA ARM – Byte Not Updating First Rate Payment Date Correctly",
+    "description": "Byte / Doc Vendor | Product / Credit: FHA ARM – Byte Not Updating First Rate Payment Date Correctly",
     "priority": "Medium",
     "status": "In Progress",
     "category": "Feature",
@@ -645,7 +691,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ FHA COMPLIANCE: FHA ARM calculation error on hold. Document blocker - FHA audits check this."
   },
   {
     "id": "86228",
@@ -659,7 +706,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 PRODUCT: New buydown option. Low priority - schedule when resources available."
   },
   {
     "id": "87116",
@@ -673,7 +721,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 URLA: Data update feature. Standard priority - schedule when Renee's backlog clears."
   },
   {
     "id": "87757",
@@ -687,7 +736,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ BYTEPRO 26.1: Dependent on BytePro release. Track vendor timeline and coordinate."
   },
   {
     "id": "87799",
@@ -701,7 +751,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🚨 VAGUE TITLE: High priority but unclear scope. Clarify requirements with Shannon immediately."
   },
   {
     "id": "87832",
@@ -715,7 +766,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⚠️ DISCLOSURE ERROR: Comp/Points confusion is TRID violation risk. Consider priority increase."
   },
   {
     "id": "89297",
@@ -729,7 +781,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🚨 MI COMPLIANCE: Delegated vs non-delegated MI is investor requirement. High priority - begin immediately."
   },
   {
     "id": "89300",
@@ -743,7 +796,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ ON HOLD: Prior to purchase hardstop blocked. Document reason and target resume date."
   },
   {
     "id": "89333",
@@ -757,7 +811,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔒 FRAUD PREVENTION: Wire instruction expiration is security control. Prioritize for risk mitigation."
   },
   {
     "id": "89658",
@@ -771,7 +826,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 UNASSIGNED: Low priority but needs owner. Assign when team capacity allows."
   },
   {
     "id": "89718",
@@ -785,7 +841,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Ready for Grooming",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 GROOMING: Ready for grooming. Schedule for next sprint planning. Fee correction prevents disclosure errors."
   },
   {
     "id": "89961",
@@ -799,7 +856,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ PRICING: HELOC pricing on hold. Document blocker - HELOC product expansion may be waiting."
   },
   {
     "id": "89991",
@@ -813,7 +871,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 FHA CONDITION: Lead paint condition automation. Low priority but FHA compliance related."
   },
   {
     "id": "90323",
@@ -827,7 +886,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 WHOLESALE: COC automation for wholesale channel. Coordinate with wholesale team for requirements."
   },
   {
     "id": "90878",
@@ -841,7 +901,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📊 GSE INTEGRATION: Fannie Mae Income Calc ID integration. Verify field mapping with GSE specs."
   },
   {
     "id": "90970",
@@ -855,7 +916,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔴 UNASSIGNED: Servicing field needs owner. Simple interest affects payment calculations."
   },
   {
     "id": "90972",
@@ -869,7 +931,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🚨 STATE COMPLIANCE ON HOLD: NY compliance updates blocked. HIGH RISK - NY has strict enforcement. Escalate immediately."
   },
   {
     "id": "90979",
@@ -883,7 +946,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏳ BSA: PTR hardstop in requirements. Push for completion - affects loan processing flow."
   },
   {
     "id": "91226",
@@ -897,7 +961,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 FORMS: H8/H9 form hardstop. Standard compliance item - continue BSA process."
   },
   {
     "id": "91254",
@@ -911,7 +976,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ BOND COMPLIANCE: First payment letters on hold. Bond programs have investor requirements - verify hold reason."
   },
   {
     "id": "91364",
@@ -925,7 +991,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ RELATED: May be related to 91254. Consider combining or sequencing these items."
   },
   {
     "id": "91652",
@@ -939,7 +1006,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🚨 FEE COMPLIANCE: Section G fee review is TRID-critical. Begin requirements immediately - disclosure accuracy required."
   },
   {
     "id": "92002",
@@ -953,7 +1021,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ VENDOR: New AMC integration on hold. May have contract/timeline with vendor - verify business status."
   },
   {
     "id": "92233",
@@ -967,7 +1036,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "On Hold",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "⏸️ UX: Conditions dropdown on hold. Document blocker - may be waiting on business decision."
   },
   {
     "id": "92240",
@@ -981,7 +1051,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔗 RELATED: Coordinate with AIO screen items 60402 and 92908 for unified implementation."
   },
   {
     "id": "92360",
@@ -995,7 +1066,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Released",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "✅ RELEASED: Successfully deployed. No action needed."
   },
   {
     "id": "92379",
@@ -1009,7 +1081,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 CD MAPPING: Settle In program fee flow. Schedule for requirements when Renee available."
   },
   {
     "id": "92476",
@@ -1023,7 +1096,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 WAREHOUSE: Field redisplay for warehouse operations. Medium priority - schedule accordingly."
   },
   {
     "id": "92486",
@@ -1037,7 +1111,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "New",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🚨🚨 DEADLINE 2/10/26: ComplianceEase password reset required in <3 weeks. IMMEDIATE ACTION - system access at risk."
   },
   {
     "id": "92632",
@@ -1051,7 +1126,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🚨🚨🚨 CRITICAL: Only Critical priority item. Credit verification fee calculation error. BEGIN IMMEDIATELY - affects revenue and disclosure accuracy."
   },
   {
     "id": "92908",
@@ -1065,7 +1141,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "Prioritized Backlog",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔗 RELATED: Third AIO screen item. Coordinate with 60402 and 92240 for batch implementation."
   },
   {
     "id": "93001",
@@ -1079,7 +1156,8 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "BSA in Progress",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "📋 AIO MASTER: This may supersede other AIO items. Verify scope overlap with 60402, 92240, 92908."
   },
   {
     "id": "93150",
@@ -1093,6 +1171,7 @@ export const backlogTickets: BacklogTicket[] = [
     "workItemType": "User Story",
     "state": "New",
     "requestor": "Product Masters\\BYTE\\BYTE Platform",
-    "tags": []
+    "tags": [],
+    "aiRecommendation": "🔥 INTEGRATION BROKEN: Essent MI 401 errors for 3+ months = broken integration. ESCALATE - users manually handling MI. Consider priority bump to High."
   }
 ];

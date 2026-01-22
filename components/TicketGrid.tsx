@@ -246,6 +246,9 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
               <th className="text-left py-3 px-4">
                 <span className="text-sm font-semibold text-gray-300">ADO State</span>
               </th>
+              <th className="text-left py-3 px-4 min-w-[300px]">
+                <span className="text-sm font-semibold text-gray-300">🤖 AI Recommendation</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -298,6 +301,21 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
                 </td>
                 <td className="py-4 px-4">
                   <span className="text-xs text-amber-400">{ticket.state}</span>
+                </td>
+                <td className="py-4 px-4">
+                  <div className="max-w-sm">
+                    <span className={`text-xs leading-relaxed ${
+                      ticket.aiRecommendation?.includes('🚨') ? 'text-rose-400' :
+                      ticket.aiRecommendation?.includes('⚠️') ? 'text-amber-400' :
+                      ticket.aiRecommendation?.includes('✅') ? 'text-green-400' :
+                      ticket.aiRecommendation?.includes('⏸️') ? 'text-purple-400' :
+                      ticket.aiRecommendation?.includes('🔴') ? 'text-red-400' :
+                      ticket.aiRecommendation?.includes('🧪') ? 'text-blue-400' :
+                      'text-gray-400'
+                    }`}>
+                      {ticket.aiRecommendation || 'No recommendation'}
+                    </span>
+                  </div>
                 </td>
               </tr>
             ))}

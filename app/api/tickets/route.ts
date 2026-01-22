@@ -42,6 +42,7 @@ export async function GET() {
       work_item_type: t.workItemType,
       state: t.state,
       requestor: t.requestor,
+      ai_recommendation: t.aiRecommendation,
     }));
 
     return NextResponse.json({
