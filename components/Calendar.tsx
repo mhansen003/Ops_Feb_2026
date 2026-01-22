@@ -2,6 +2,7 @@
 
 import { type Ticket } from '@/lib/data-client';
 import { useState } from 'react';
+import { TicketLink } from './TicketLink';
 
 interface CalendarProps {
   tickets: Ticket[];
@@ -47,6 +48,38 @@ export default function Calendar({ tickets }: CalendarProps) {
   const readyForProd = getTicketsByState('Ready for Prod');
   const inQA = getTicketsByState('In QA');
   const inDev = getTicketsByState('In Dev');
+  const bsaInProgress = getTicketsByState('BSA in Progress');
+  const gatheringRequirements = getTicketsByState('Gathering Requirements');
+
+  // Simulate projected release dates based on current state
+  const getProjectedReleaseWeek = (ticket: Ticket): number => {
+    // Estimate weeks until release based on ADO state
+    const stateWeekEstimates: Record<string, number> = {
+      'Tuesday Release': 0,
+      'Ready for Prod': 0,
+      'Ready to Release with Clear': 0,
+      'In QA': 1,
+      'In Dev': 2,
+      'BSA in Progress': 3,
+      'Gathering Requirements': 4,
+      'Prioritized Backlog': 5,
+      'Ready for Grooming': 5,
+      'On Hold': 6,
+      'MISC': 6,
+      'New': 7,
+    };
+
+    return stateWeekEstimates[ticket.state || ''] ?? 6;
+  };
+
+  // Group tickets by projected release week
+  const ticketsByReleaseWeek = releaseWednesdays.map((_, weekIndex) => {
+    return tickets.filter(t => {
+      if (t.status === 'Completed') return false;
+      const projectedWeek = getProjectedReleaseWeek(t);
+      return projectedWeek === weekIndex;
+    });
+  });
 
   // Format date for display
   const formatDate = (date: Date) => {
@@ -159,54 +192,78 @@ export default function Calendar({ tickets }: CalendarProps) {
           Release: {formatDate(releaseWednesdays[selectedWeek])}
         </h3>
 
-        {selectedWeek === 0 ? (
-          <>
-            <p className="text-gray-400 mb-4">
-              Items ready for the next Wednesday release:
-            </p>
+        {(() => {
+          const weekTickets = ticketsByReleaseWeek[selectedWeek] || [];
+          const isCurrentRelease = selectedWeek === 0;
 
-            {/* Ready for Release Items */}
-            {readyForRelease.length > 0 ? (
-              <div className="space-y-3">
-                {readyForRelease.map(ticket => (
-                  <div
-                    key={ticket.id}
-                    className="p-4 bg-green-500/10 rounded-lg border border-green-500/30"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-sm font-mono text-gray-400">{ticket.id}</span>
-                          <span className={`badge badge-${ticket.priority.toLowerCase()}`}>
-                            {ticket.priority}
-                          </span>
-                          <span className="text-xs text-blue-400">{ticket.state}</span>
+          // Sort by priority
+          const sortedTickets = [...weekTickets].sort((a, b) => {
+            const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
+            return priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
+          });
+
+          return (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-gray-400">
+                  {isCurrentRelease
+                    ? 'Items ready for the next Wednesday release:'
+                    : `Projected items for this release (${weekTickets.length} tickets):`}
+                </p>
+                {!isCurrentRelease && weekTickets.length > 0 && (
+                  <span className="text-xs px-2 py-1 bg-amber-500/20 text-amber-400 rounded">
+                    Projected
+                  </span>
+                )}
+              </div>
+
+              {sortedTickets.length > 0 ? (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {sortedTickets.map(ticket => (
+                    <div
+                      key={ticket.id}
+                      className={`p-4 rounded-lg border ${
+                        isCurrentRelease
+                          ? 'bg-green-500/10 border-green-500/30'
+                          : 'bg-amber-500/10 border-amber-500/30'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <TicketLink ticketId={ticket.id} className="text-sm font-mono" />
+                            <span className={`badge badge-${ticket.priority.toLowerCase()}`}>
+                              {ticket.priority}
+                            </span>
+                            <span className="text-xs text-blue-400">{ticket.state}</span>
+                          </div>
+                          <h4 className="font-semibold text-white mb-1">{ticket.title}</h4>
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span>👤 {ticket.assignee}</span>
+                            <span>📅 Created: {ticket.createdDate}</span>
+                          </div>
                         </div>
-                        <h4 className="font-semibold text-white mb-1">{ticket.title}</h4>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>👤 {ticket.assignee}</span>
-                          <span>📅 Created: {ticket.createdDate}</span>
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          isCurrentRelease
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          {isCurrentRelease ? 'Ready' : 'Projected'}
                         </div>
-                      </div>
-                      <div className="px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
-                        Ready
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No items currently ready for release
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-8 text-gray-400">
-            <p>Future release window</p>
-            <p className="text-sm mt-2">Items currently in progress may be ready by this date</p>
-          </div>
-        )}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  {isCurrentRelease
+                    ? 'No items currently ready for release'
+                    : 'No items projected for this release window'}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       {/* In Progress - Coming Soon */}
@@ -224,7 +281,7 @@ export default function Calendar({ tickets }: CalendarProps) {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-sm font-mono text-gray-400">{ticket.id}</span>
+                    <TicketLink ticketId={ticket.id} className="text-sm font-mono" />
                     <span className={`badge badge-${ticket.priority.toLowerCase()}`}>
                       {ticket.priority}
                     </span>

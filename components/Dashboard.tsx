@@ -83,8 +83,11 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 contentStyle={{
                   backgroundColor: '#1a2234',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  color: '#ffffff',
                 }}
+                itemStyle={{ color: '#ffffff' }}
+                labelStyle={{ color: '#9ca3af' }}
               />
               <Legend
                 verticalAlign="bottom"
@@ -111,8 +114,11 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 contentStyle={{
                   backgroundColor: '#1a2234',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  color: '#ffffff',
                 }}
+                itemStyle={{ color: '#ffffff' }}
+                labelStyle={{ color: '#9ca3af' }}
               />
               <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 0, 0]} />
             </BarChart>
@@ -131,8 +137,11 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 contentStyle={{
                   backgroundColor: '#1a2234',
                   border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '8px'
+                  borderRadius: '8px',
+                  color: '#ffffff',
                 }}
+                itemStyle={{ color: '#ffffff' }}
+                labelStyle={{ color: '#9ca3af' }}
               />
               <Bar dataKey="value" radius={[0, 8, 8, 0]}>
                 {assigneeData.map((entry, index) => (

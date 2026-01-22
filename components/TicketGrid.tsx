@@ -10,8 +10,8 @@ interface TicketGridProps {
 
 export default function TicketGrid({ tickets: initialTickets }: TicketGridProps) {
   const tickets = initialTickets;
-  const [sortField, setSortField] = useState<keyof Ticket | 'sme'>('createdDate');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortField, setSortField] = useState<keyof Ticket | 'sme'>('priority');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
   const [filterStatus, setFilterStatus] = useState<Status | 'All'>('All');
   const [filterAssignee, setFilterAssignee] = useState<string>('All');
@@ -45,6 +45,14 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
 
   // Sort tickets
   filteredTickets = [...filteredTickets].sort((a, b) => {
+    // Special handling for priority - use custom order
+    if (sortField === 'priority') {
+      const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
+      const aIdx = priorityOrder.indexOf(a.priority);
+      const bIdx = priorityOrder.indexOf(b.priority);
+      return sortDirection === 'asc' ? aIdx - bIdx : bIdx - aIdx;
+    }
+
     let aValue: string;
     let bValue: string;
 

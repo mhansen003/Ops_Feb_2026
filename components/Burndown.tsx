@@ -95,21 +95,50 @@ export default function Burndown({ tickets, stats }: BurndownProps) {
     return stats;
   }, [openTickets]);
 
-  // Burndown data simulation (since we don't have historical data)
+  // Burndown data simulation - projects remaining items to 0
   const burndownData = useMemo(() => {
     const total = stats.total;
     const completed = stats.byStatus['Completed'] || 0;
+    const remaining = total - completed;
+
+    // Calculate velocity (assume we complete ~5-8 tickets per week based on current progress)
+    const completionRate = completed > 0 ? completed / 4 : 5; // tickets per week
+    const weeksToComplete = Math.ceil(remaining / Math.max(completionRate, 3));
+    const totalWeeks = Math.min(Math.max(weeksToComplete + 2, 8), 16); // 8-16 week projection
+
     const data = [];
 
-    // Create a simulated 4-week burndown
-    const weeksData = [
-      { week: 'Week 1', remaining: total, completed: 0, ideal: total },
-      { week: 'Week 2', remaining: Math.round(total * 0.85), completed: Math.round(total * 0.15), ideal: Math.round(total * 0.75) },
-      { week: 'Week 3', remaining: Math.round(total * 0.7), completed: Math.round(total * 0.3), ideal: Math.round(total * 0.5) },
-      { week: 'Week 4', remaining: total - completed, completed: completed, ideal: Math.round(total * 0.25) },
-    ];
+    for (let week = 0; week <= totalWeeks; week++) {
+      const weekLabel = week === 0 ? 'Now' : `Week ${week}`;
 
-    return weeksData;
+      // Actual/projected remaining (decreasing curve)
+      let projectedRemaining;
+      if (week === 0) {
+        projectedRemaining = remaining;
+      } else {
+        // Simulate completion with slight variance - accelerating as we focus
+        const baseCompletion = completionRate * (1 + (week * 0.05)); // slight acceleration
+        projectedRemaining = Math.max(0, remaining - (baseCompletion * week));
+      }
+
+      // Ideal line (straight from current remaining to 0)
+      const idealRemaining = Math.max(0, remaining - (remaining / totalWeeks) * week);
+
+      // Completed (inverse of remaining)
+      const projectedCompleted = total - projectedRemaining;
+
+      data.push({
+        week: weekLabel,
+        remaining: Math.round(projectedRemaining),
+        completed: Math.round(projectedCompleted),
+        ideal: Math.round(idealRemaining),
+      });
+
+      // Stop if we've reached 0
+      if (projectedRemaining <= 0) break;
+    }
+
+    return data;
   }, [stats]);
 
   // Priority distribution for chart
