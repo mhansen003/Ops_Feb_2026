@@ -11,11 +11,10 @@ export interface Ticket {
   category: Category;
   assignee: string;
   createdDate: string;
-  targetDate: string;
-  estimatedEffort: string;
-  dependencies?: string[];
   tags: string[];
-  project?: string;
+  workItemType?: string;
+  state?: string;
+  requestor?: string;
 }
 
 export interface TicketStats {
@@ -33,24 +32,10 @@ export interface TicketStats {
     'Ready for Review': number;
     Completed: number;
   };
-  byCategory: {
-    Infrastructure: number;
-    Security: number;
-    Performance: number;
-    Feature: number;
-    'Bug Fix': number;
-    Documentation: number;
-  };
-  byProject: Record<string, number>;
+  byAssignee: Record<string, number>;
 }
 
-export interface LastImport {
-  imported_at: string;
-  ticket_count: number;
-  projects: string[];
-}
-
-export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: TicketStats; lastImport: LastImport | null }> {
+export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: TicketStats }> {
   const response = await fetch('/api/tickets', {
     cache: 'no-store'
   });
@@ -61,7 +46,7 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
 
   const data = await response.json();
 
-  // Transform database tickets to client format
+  // Transform tickets to client format
   const tickets: Ticket[] = data.tickets.map((t: any) => ({
     id: t.id,
     title: t.title,
@@ -70,67 +55,21 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
     status: t.status as Status,
     category: t.category as Category,
     assignee: t.assignee || 'Unassigned',
-    createdDate: new Date(t.created_date).toISOString().split('T')[0],
-    targetDate: new Date(t.target_date).toISOString().split('T')[0],
-    estimatedEffort: t.estimated_effort || 'Not estimated',
+    createdDate: t.created_date,
     tags: t.tags || [],
-    project: t.project
+    workItemType: t.work_item_type,
+    state: t.state,
+    requestor: t.requestor,
   }));
 
-  // Calculate statistics
+  // Use stats from API (already calculated server-side)
   const stats: TicketStats = {
-    total: tickets.length,
-    byPriority: {
-      Critical: tickets.filter(t => t.priority === 'Critical').length,
-      High: tickets.filter(t => t.priority === 'High').length,
-      Medium: tickets.filter(t => t.priority === 'Medium').length,
-      Low: tickets.filter(t => t.priority === 'Low').length,
-    },
-    byStatus: {
-      New: tickets.filter(t => t.status === 'New').length,
-      'In Progress': tickets.filter(t => t.status === 'In Progress').length,
-      Blocked: tickets.filter(t => t.status === 'Blocked').length,
-      'Ready for Review': tickets.filter(t => t.status === 'Ready for Review').length,
-      Completed: tickets.filter(t => t.status === 'Completed').length,
-    },
-    byCategory: {
-      Infrastructure: tickets.filter(t => t.category === 'Infrastructure').length,
-      Security: tickets.filter(t => t.category === 'Security').length,
-      Performance: tickets.filter(t => t.category === 'Performance').length,
-      Feature: tickets.filter(t => t.category === 'Feature').length,
-      'Bug Fix': tickets.filter(t => t.category === 'Bug Fix').length,
-      Documentation: tickets.filter(t => t.category === 'Documentation').length,
-    },
-    byProject: tickets.reduce((acc, ticket) => {
-      const project = ticket.project || 'Unassigned';
-      acc[project] = (acc[project] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>),
+    total: data.stats.total,
+    byPriority: data.stats.byPriority,
+    byStatus: data.stats.byStatus,
+    byAssignee: data.stats.byAssignee,
   };
 
-  return { tickets, stats, lastImport: data.lastImport };
+  return { tickets, stats };
 }
 
-export interface ProjectSelection {
-  byteLos: boolean;
-  byte: boolean;
-  productMasters: boolean;
-}
-
-export async function refreshData(selection: ProjectSelection): Promise<{ success: boolean; message: string; stats?: any }> {
-  const response = await fetch('/api/refresh', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ selection }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || 'Failed to refresh data');
-  }
-
-  return data;
-}

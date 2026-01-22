@@ -5,22 +5,16 @@ import Dashboard from '@/components/Dashboard';
 import Calendar from '@/components/Calendar';
 import TicketGrid from '@/components/TicketGrid';
 import CriticalQuestions from '@/components/CriticalQuestions';
-import Takeaways from '@/components/Takeaways';
-import RefreshModal, { type ProjectSelection } from '@/components/RefreshModal';
-import { fetchTickets, refreshData, type Ticket, type TicketStats, type LastImport } from '@/lib/data-client';
+import { fetchTickets, type Ticket, type TicketStats } from '@/lib/data-client';
 
-type Tab = 'dashboard' | 'calendar' | 'tickets' | 'questions' | 'takeaways';
+type Tab = 'dashboard' | 'calendar' | 'tickets' | 'questions';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<TicketStats | null>(null);
-  const [lastImport, setLastImport] = useState<LastImport | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showRefreshModal, setShowRefreshModal] = useState(false);
-  const [importStats, setImportStats] = useState<any>(null);
 
   const loadData = async () => {
     try {
@@ -29,35 +23,11 @@ export default function Home() {
       const data = await fetchTickets();
       setTickets(data.tickets);
       setStats(data.stats);
-      setLastImport(data.lastImport);
     } catch (err: any) {
       setError(err.message);
       console.error('Error loading data:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleRefresh = async (selection: ProjectSelection) => {
-    try {
-      setRefreshing(true);
-      setError(null);
-      setImportStats(null);
-      const result = await refreshData(selection);
-      if (result.success) {
-        setImportStats(result.stats);
-        await loadData();
-        // Keep modal open to show success message for 3 seconds
-        setTimeout(() => {
-          setShowRefreshModal(false);
-          setImportStats(null);
-        }, 3000);
-      }
-    } catch (err: any) {
-      setError(err.message);
-      console.error('Error refreshing data:', err);
-    } finally {
-      setRefreshing(false);
     }
   };
 
@@ -70,7 +40,6 @@ export default function Home() {
     { id: 'calendar' as Tab, label: 'Calendar', icon: '📅' },
     { id: 'tickets' as Tab, label: 'Ticket Grid', icon: '🎫' },
     { id: 'questions' as Tab, label: 'Critical Questions', icon: '❓' },
-    { id: 'takeaways' as Tab, label: 'Takeaways & Next Steps', icon: '🎯' },
   ];
 
   return (
@@ -81,33 +50,15 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-2 gradient-text">
-                Operations Backlog
+                Byte Backlog
               </h1>
               <div className="space-y-1">
                 <p className="text-lg text-gray-400">
-                  Executive Operations Dashboard - February 2026
-                  {stats && <span className="ml-4 text-sm">({stats.total} tickets loaded)</span>}
+                  Stack Ranked - January 2026
+                  {stats && <span className="ml-4 text-sm">({stats.total} tickets)</span>}
                 </p>
-                {lastImport && (
-                  <p className="text-sm text-gray-500">
-                    Last imported: {new Date(lastImport.imported_at).toLocaleString()} from {lastImport.projects.join(', ')}
-                  </p>
-                )}
               </div>
             </div>
-            <button
-              onClick={() => setShowRefreshModal(true)}
-              disabled={refreshing}
-              className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                refreshing
-                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:shadow-lg hover:scale-105'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                🔄 Refresh from ADO
-              </span>
-            </button>
           </div>
           {error && (
             <div className="mt-4 p-4 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">
@@ -139,19 +90,13 @@ export default function Home() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                <p className="text-gray-400">Loading data from database...</p>
+                <p className="text-gray-400">Loading backlog data...</p>
               </div>
             </div>
           ) : tickets.length === 0 ? (
             <div className="card text-center py-20">
               <h2 className="text-2xl font-bold mb-4">No Data Available</h2>
-              <p className="text-gray-400 mb-6">Click "Refresh from ADO" to import tickets from Azure DevOps</p>
-              <button
-                onClick={() => setShowRefreshModal(true)}
-                className="px-6 py-3 rounded-lg font-medium bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:shadow-lg hover:scale-105 transition-all"
-              >
-                🔄 Import Data Now
-              </button>
+              <p className="text-gray-400 mb-6">Backlog data is being loaded...</p>
             </div>
           ) : (
             <>
@@ -159,19 +104,9 @@ export default function Home() {
               {activeTab === 'calendar' && <Calendar tickets={tickets} />}
               {activeTab === 'tickets' && <TicketGrid tickets={tickets} />}
               {activeTab === 'questions' && <CriticalQuestions tickets={tickets} stats={stats!} />}
-              {activeTab === 'takeaways' && <Takeaways tickets={tickets} stats={stats!} />}
             </>
           )}
         </div>
-
-        {/* Refresh Modal */}
-        <RefreshModal
-          isOpen={showRefreshModal}
-          onClose={() => !refreshing && setShowRefreshModal(false)}
-          onConfirm={handleRefresh}
-          isRefreshing={refreshing}
-          importStats={importStats}
-        />
       </div>
     </main>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { type Ticket, type Priority, type Status } from '@/lib/data-client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 interface TicketGridProps {
   tickets: Ticket[];
@@ -9,45 +9,58 @@ interface TicketGridProps {
 
 export default function TicketGrid({ tickets: initialTickets }: TicketGridProps) {
   const tickets = initialTickets;
-  const [sortField, setSortField] = useState<keyof Ticket>('createdDate');
+  const [sortField, setSortField] = useState<keyof Ticket | 'sme'>('createdDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
   const [filterStatus, setFilterStatus] = useState<Status | 'All'>('All');
-  const [filterProject, setFilterProject] = useState<string>('All');
+  const [filterAssignee, setFilterAssignee] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Get unique projects
-  const projects = ['All', ...Array.from(new Set(tickets.map(t => t.project).filter(Boolean)))].sort();
+  // Get unique assignees
+  const assignees = useMemo(() => {
+    const unique = [...new Set(tickets.map(t => t.assignee).filter(Boolean))].sort();
+    return ['All', ...unique];
+  }, [tickets]);
+
+  // SME mapping - For this context, SME (Subject Matter Expert) is the assigned developer
+  const getSME = (ticket: Ticket): string => {
+    return ticket.assignee || 'Unassigned';
+  };
 
   // Filter tickets
   let filteredTickets = tickets.filter(ticket => {
     const matchesPriority = filterPriority === 'All' || ticket.priority === filterPriority;
     const matchesStatus = filterStatus === 'All' || ticket.status === filterStatus;
-    const matchesProject = filterProject === 'All' || ticket.project === filterProject;
+    const matchesAssignee = filterAssignee === 'All' || ticket.assignee === filterAssignee;
     const matchesSearch = searchTerm === '' ||
       ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.assignee.toLowerCase().includes(searchTerm.toLowerCase());
+      ticket.assignee.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (ticket.state && ticket.state.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    return matchesPriority && matchesStatus && matchesProject && matchesSearch;
+    return matchesPriority && matchesStatus && matchesAssignee && matchesSearch;
   });
 
   // Sort tickets
   filteredTickets = [...filteredTickets].sort((a, b) => {
-    const aValue = a[sortField];
-    const bValue = b[sortField];
+    let aValue: string;
+    let bValue: string;
 
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortDirection === 'asc'
-        ? aValue.localeCompare(bValue)
-        : bValue.localeCompare(aValue);
+    if (sortField === 'sme') {
+      aValue = getSME(a);
+      bValue = getSME(b);
+    } else {
+      aValue = String(a[sortField] || '');
+      bValue = String(b[sortField] || '');
     }
 
-    return 0;
+    return sortDirection === 'asc'
+      ? aValue.localeCompare(bValue)
+      : bValue.localeCompare(aValue);
   });
 
-  const handleSort = (field: keyof Ticket) => {
+  const handleSort = (field: keyof Ticket | 'sme') => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -72,9 +85,9 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
       <div className="card">
         <h2 className="text-2xl font-bold mb-6">Ticket Grid</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <label className="block text-sm font-medium text-gray-400 mb-2">Search</label>
             <input
               type="text"
@@ -85,16 +98,16 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
             />
           </div>
 
-          {/* Project Filter */}
+          {/* Assignee Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Project</label>
+            <label className="block text-sm font-medium text-gray-400 mb-2">Assignee</label>
             <select
-              value={filterProject}
-              onChange={(e) => setFilterProject(e.target.value)}
+              value={filterAssignee}
+              onChange={(e) => setFilterAssignee(e.target.value)}
               className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              {projects.map(project => (
-                <option key={project} value={project}>{project}</option>
+              {assignees.map(assignee => (
+                <option key={assignee} value={assignee}>{assignee}</option>
               ))}
             </select>
           </div>
@@ -155,7 +168,7 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
                   )}
                 </button>
               </th>
-              <th className="text-left py-3 px-4">
+              <th className="text-left py-3 px-4 min-w-[300px]">
                 <button
                   onClick={() => handleSort('title')}
                   className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
@@ -190,22 +203,22 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
               </th>
               <th className="text-left py-3 px-4">
                 <button
-                  onClick={() => handleSort('category')}
+                  onClick={() => handleSort('assignee')}
                   className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
                 >
-                  Category
-                  {sortField === 'category' && (
+                  Assigned
+                  {sortField === 'assignee' && (
                     <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </button>
               </th>
               <th className="text-left py-3 px-4">
                 <button
-                  onClick={() => handleSort('assignee')}
+                  onClick={() => handleSort('sme')}
                   className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
                 >
-                  Assignee
-                  {sortField === 'assignee' && (
+                  SME
+                  {sortField === 'sme' && (
                     <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </button>
@@ -222,39 +235,25 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
                 </button>
               </th>
               <th className="text-left py-3 px-4">
-                <button
-                  onClick={() => handleSort('targetDate')}
-                  className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
-                >
-                  Target
-                  {sortField === 'targetDate' && (
-                    <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                  )}
-                </button>
-              </th>
-              <th className="text-left py-3 px-4">
-                <span className="text-sm font-semibold text-gray-300">Effort</span>
+                <span className="text-sm font-semibold text-gray-300">ADO State</span>
               </th>
             </tr>
           </thead>
           <tbody>
-            {filteredTickets.map((ticket) => {
-              const isOverdue = new Date(ticket.targetDate) < new Date();
-
-              return (
+            {filteredTickets.map((ticket) => (
               <tr
                 key={ticket.id}
-                className={`border-b border-gray-800 hover:bg-gray-800/30 transition-colors ${
-                  isOverdue ? 'bg-rose-500/5 border-rose-500/20' : ''
-                }`}
+                className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors"
               >
                 <td className="py-4 px-4">
                   <span className="font-mono text-sm text-gray-400">{ticket.id}</span>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="max-w-xs">
+                  <div className="max-w-md">
                     <div className="font-medium text-white mb-1">{ticket.title}</div>
-                    <div className="text-xs text-gray-500 line-clamp-2">{ticket.description}</div>
+                    {ticket.workItemType && (
+                      <span className="text-xs text-gray-500">{ticket.workItemType}</span>
+                    )}
                   </div>
                 </td>
                 <td className="py-4 px-4">
@@ -263,43 +262,36 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
                   </span>
                 </td>
                 <td className="py-4 px-4">
-                  <span className="text-sm text-gray-300">{ticket.status}</span>
-                </td>
-                <td className="py-4 px-4">
-                  <span className="text-sm text-gray-400">{ticket.category}</span>
+                  <span className={`text-sm px-2 py-1 rounded ${
+                    ticket.status === 'Completed' ? 'bg-green-500/20 text-green-400' :
+                    ticket.status === 'In Progress' ? 'bg-blue-500/20 text-blue-400' :
+                    ticket.status === 'Ready for Review' ? 'bg-teal-500/20 text-teal-400' :
+                    ticket.status === 'Blocked' ? 'bg-red-500/20 text-red-400' :
+                    'bg-gray-500/20 text-gray-400'
+                  }`}>
+                    {ticket.status}
+                  </span>
                 </td>
                 <td className="py-4 px-4">
                   <span className="text-sm text-gray-300">{ticket.assignee}</span>
                 </td>
                 <td className="py-4 px-4">
+                  <span className="text-sm text-blue-400">{getSME(ticket)}</span>
+                </td>
+                <td className="py-4 px-4">
                   <span className="text-sm text-gray-400">
                     {new Date(ticket.createdDate).toLocaleDateString('en-US', {
                       month: 'short',
-                      day: 'numeric'
+                      day: 'numeric',
+                      year: 'numeric'
                     })}
                   </span>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm ${isOverdue ? 'text-rose-400 font-semibold' : 'text-gray-400'}`}>
-                      {new Date(ticket.targetDate).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                    {isOverdue && (
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-semibold">
-                        OVERDUE
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <span className="text-sm text-gray-400">{ticket.estimatedEffort}</span>
+                  <span className="text-xs text-amber-400">{ticket.state}</span>
                 </td>
               </tr>
-              );
-            })}
+            ))}
           </tbody>
         </table>
 

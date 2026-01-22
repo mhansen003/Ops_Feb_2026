@@ -15,19 +15,18 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
     { name: 'High', value: stats.byPriority.High, color: '#f59e0b' },
     { name: 'Medium', value: stats.byPriority.Medium, color: '#3b82f6' },
     { name: 'Low', value: stats.byPriority.Low, color: '#14b8a6' },
-  ];
+  ].filter(d => d.value > 0);
 
-  const categoryData = Object.entries(stats.byCategory).map(([name, value]) => ({
-    name,
-    value,
-  }));
+  const assigneeData = Object.entries(stats.byAssignee)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
 
   const statusData = Object.entries(stats.byStatus).map(([name, value]) => ({
     name,
     value,
   }));
 
-  const COLORS = ['#3b82f6', '#14b8a6', '#f59e0b', '#f43f5e', '#a855f7', '#10b981'];
+  const COLORS = ['#3b82f6', '#14b8a6', '#f59e0b', '#f43f5e', '#a855f7', '#10b981', '#6366f1', '#ec4899', '#84cc16'];
 
   return (
     <div className="space-y-6">
@@ -52,16 +51,16 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
           gradient="from-amber-500 to-orange-500"
         />
         <MetricCard
-          title="Blocked"
-          value={stats.byStatus.Blocked}
-          icon="🚫"
-          gradient="from-purple-500 to-indigo-500"
+          title="Ready for Review"
+          value={stats.byStatus['Ready for Review']}
+          icon="✅"
+          gradient="from-green-500 to-emerald-500"
         />
       </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Priority Distribution */}
+        {/* Priority Distribution - Fixed with legend instead of inline labels */}
         <div className="card">
           <h3 className="text-xl font-semibold mb-6">Priority Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -70,11 +69,10 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 data={priorityData}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                label={({ name, value }) => `${name}: ${value}`}
-                outerRadius={100}
+                outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
+                label={({ value }) => value}
               >
                 {priorityData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -87,6 +85,15 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                   borderRadius: '8px'
                 }}
               />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                formatter={(value, entry: any) => (
+                  <span style={{ color: '#cbd5e1' }}>
+                    {value}: {entry.payload.value}
+                  </span>
+                )}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -97,7 +104,7 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={statusData}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="name" stroke="#cbd5e1" />
+              <XAxis dataKey="name" stroke="#cbd5e1" angle={-15} textAnchor="end" height={60} fontSize={12} />
               <YAxis stroke="#cbd5e1" />
               <Tooltip
                 contentStyle={{
@@ -111,14 +118,14 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
           </ResponsiveContainer>
         </div>
 
-        {/* Category Breakdown */}
+        {/* Assignee Workload - Replaced Category Breakdown */}
         <div className="card lg:col-span-2">
-          <h3 className="text-xl font-semibold mb-6">Category Breakdown</h3>
+          <h3 className="text-xl font-semibold mb-6">Workload by Assignee</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryData} layout="horizontal">
+            <BarChart data={assigneeData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis type="number" stroke="#cbd5e1" />
-              <YAxis dataKey="name" type="category" stroke="#cbd5e1" width={120} />
+              <YAxis dataKey="name" type="category" stroke="#cbd5e1" width={130} fontSize={12} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#1a2234',
@@ -127,7 +134,7 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 }}
               />
               <Bar dataKey="value" radius={[0, 8, 8, 0]}>
-                {categoryData.map((entry, index) => (
+                {assigneeData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>
@@ -139,7 +146,7 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
       {/* High Priority Items */}
       <div className="card">
         <h3 className="text-xl font-semibold mb-4">Critical & High Priority Items</h3>
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[600px] overflow-y-auto">
           {tickets
             .filter(t => t.priority === 'Critical' || t.priority === 'High')
             .sort((a, b) => {
@@ -161,17 +168,16 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                       }`}>
                         {ticket.priority}
                       </span>
-                      <span className="text-xs text-gray-500">{ticket.category}</span>
+                      <span className="text-xs text-gray-500">{ticket.workItemType}</span>
                     </div>
                     <h4 className="font-semibold text-white mb-1">{ticket.title}</h4>
-                    <p className="text-sm text-gray-400 mb-2">{ticket.description}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
                       <span>👤 {ticket.assignee}</span>
-                      <span>📅 Target: {new Date(ticket.targetDate).toLocaleDateString()}</span>
-                      <span>⏱️ {ticket.estimatedEffort}</span>
+                      <span>📅 Created: {ticket.createdDate}</span>
+                      {ticket.state && <span className="text-blue-400">ADO: {ticket.state}</span>}
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                     ticket.status === 'Blocked' ? 'bg-red-500/20 text-red-400' :
                     ticket.status === 'In Progress' ? 'bg-blue-500/20 text-blue-400' :
                     ticket.status === 'Ready for Review' ? 'bg-green-500/20 text-green-400' :
@@ -182,6 +188,9 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 </div>
               </div>
             ))}
+          {tickets.filter(t => t.priority === 'Critical' || t.priority === 'High').length === 0 && (
+            <p className="text-gray-400 text-center py-8">No critical or high priority items</p>
+          )}
         </div>
       </div>
     </div>

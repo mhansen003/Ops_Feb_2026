@@ -8,71 +8,64 @@ interface CriticalQuestionsProps {
 }
 
 export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsProps) {
-  // Calculate real insights from data
-  const today = new Date();
-
   // High priority items (Critical + High)
   const highPriorityCount = (stats.byPriority.Critical || 0) + (stats.byPriority.High || 0);
+  const highPriorityTickets = tickets.filter(t => t.priority === 'Critical' || t.priority === 'High');
 
-  // Overdue tickets
-  const overdueTickets = tickets.filter(t => new Date(t.targetDate) < today);
-
-  // Upcoming due items (next 14 days)
-  const upcomingDue = tickets.filter(t => {
-    const dueDate = new Date(t.targetDate);
-    const daysUntil = Math.floor((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return daysUntil >= 0 && daysUntil <= 14;
-  });
-
-  // Top assignees by workload
-  const assigneeWorkload = tickets.reduce((acc, ticket) => {
-    acc[ticket.assignee] = (acc[ticket.assignee] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
+  // Workload by assignee
+  const assigneeWorkload = stats.byAssignee || {};
   const topAssignees = Object.entries(assigneeWorkload)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  // Blocked items details
+  // Items by status
+  const newTickets = tickets.filter(t => t.status === 'New');
+  const inProgressTickets = tickets.filter(t => t.status === 'In Progress');
+  const readyForReviewTickets = tickets.filter(t => t.status === 'Ready for Review');
   const blockedTickets = tickets.filter(t => t.status === 'Blocked');
 
-  // Security items
-  const securityCount = stats.byCategory?.Security || 0;
+  // Items by ADO state (more granular)
+  const getTicketsByState = (state: string) => tickets.filter(t => t.state === state);
+  const inQATickets = getTicketsByState('In QA');
+  const inDevTickets = getTicketsByState('In Dev');
+  const bsaInProgressTickets = getTicketsByState('BSA in Progress');
+  const onHoldTickets = getTicketsByState('On Hold');
+  const prioritizedBacklogTickets = getTicketsByState('Prioritized Backlog');
 
-  // Calculate team capacity metrics
+  // Unique assignees
   const uniqueAssignees = new Set(tickets.map(t => t.assignee).filter(a => a !== 'Unassigned')).size;
   const avgTicketsPerPerson = uniqueAssignees > 0 ? Math.round(tickets.length / uniqueAssignees) : 0;
+
+  // Unassigned items
+  const unassignedTickets = tickets.filter(t => !t.assignee || t.assignee === 'Unassigned');
 
   const questions = [
     {
       id: 1,
-      question: 'What are our highest-risk items that could impact production?',
+      question: 'What are our highest-risk items that could impact delivery?',
       icon: '🔴',
       color: 'border-rose-500',
       answer: {
         summary: highPriorityCount > 0
-          ? `We have ${highPriorityCount} high-priority items requiring immediate attention, with ${overdueTickets.length} already overdue.`
-          : `No critical priority items currently. ${overdueTickets.length} items are overdue and need review.`,
-        details: overdueTickets.length > 0
+          ? `We have ${highPriorityCount} high-priority items (${stats.byPriority.Critical} Critical, ${stats.byPriority.High} High) requiring attention.`
+          : 'No critical or high priority items currently flagged.',
+        details: highPriorityTickets.length > 0
           ? [
-              ...overdueTickets.slice(0, 4).map(t => {
-                const daysOverdue = Math.floor((today.getTime() - new Date(t.targetDate).getTime()) / (1000 * 60 * 60 * 24));
-                return `${t.id}: ${t.title.substring(0, 70)} (${daysOverdue} days overdue)`;
-              }),
-              overdueTickets.length > 4 ? `...and ${overdueTickets.length - 4} more overdue items` : ''
+              ...highPriorityTickets.slice(0, 4).map(t =>
+                `${t.id}: ${t.title.substring(0, 60)}... [${t.priority}] - ${t.assignee}`
+              ),
+              highPriorityTickets.length > 4 ? `...and ${highPriorityTickets.length - 4} more high-priority items` : ''
             ].filter(Boolean)
           : [
-              'No overdue items - team is on track',
-              `${upcomingDue.length} items due in next 14 days`,
-              `Focus on ${stats.byCategory.Security || 0} security items`,
-              'Monitor blocked items for resolution'
+              'No critical or high priority items',
+              `${stats.byPriority.Medium} medium priority items to monitor`,
+              `${stats.byPriority.Low} low priority items`,
             ],
-        recommendation: overdueTickets.length > 3
-          ? `Immediate action required: ${overdueTickets.length} overdue items. Recommend daily standup focused on clearing overdue backlog. Consider resource reallocation.`
-          : overdueTickets.length > 0
-          ? `Address ${overdueTickets.length} overdue item(s). Review priorities and adjust timelines as needed.`
-          : 'Team is on track. Continue monitoring upcoming deadlines and blocked items.'
+        recommendation: highPriorityCount > 10
+          ? `Review ${highPriorityCount} high-priority items. Consider resource reallocation to address critical items first. Daily standups recommended for high-priority items.`
+          : highPriorityCount > 0
+          ? `${highPriorityCount} high-priority items are manageable. Ensure assignees have capacity to complete these first.`
+          : 'No critical items. Focus on maintaining momentum and monitoring medium priority items.'
       }
     },
     {
@@ -81,108 +74,113 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
       icon: '👥',
       color: 'border-blue-500',
       answer: {
-        summary: `${stats.byStatus['In Progress'] || 0} items currently in progress across ${uniqueAssignees} active team members (avg ${avgTicketsPerPerson} tickets/person).`,
+        summary: `${inProgressTickets.length} items in progress across ${uniqueAssignees} active team members (avg ${avgTicketsPerPerson} tickets/person).`,
         details: [
-          `${blockedTickets.length} blocked items need immediate resolution`,
           `Top loaded: ${topAssignees[0]?.[0]} (${topAssignees[0]?.[1]} tickets), ${topAssignees[1]?.[0]} (${topAssignees[1]?.[1]} tickets)`,
-          `${stats.byStatus.New || 0} new items need assignment and sizing`,
-          `${upcomingDue.length} items due within next 14 days`
+          `${unassignedTickets.length} unassigned items need assignment`,
+          `${newTickets.length} new items in backlog (${prioritizedBacklogTickets.length} prioritized)`,
+          `${readyForReviewTickets.length} items ready for review/release`
         ],
-        recommendation: avgTicketsPerPerson > 15
+        recommendation: avgTicketsPerPerson > 12
           ? 'Team capacity at HIGH utilization. Recommend resource allocation review and consider deferring lower priority work.'
-          : avgTicketsPerPerson > 10
-          ? 'Team capacity at MODERATE utilization. Monitor workload and unblock items quickly.'
+          : avgTicketsPerPerson > 8
+          ? 'Team capacity at MODERATE utilization. Monitor workload and ensure blockers are resolved quickly.'
           : 'Team capacity appears manageable. Focus on velocity and quality.'
       }
     },
     {
       id: 3,
-      question: 'What dependencies could derail our timeline?',
-      icon: '🔗',
+      question: 'What items are blocked and need escalation?',
+      icon: '🚫',
       color: 'border-amber-500',
       answer: {
         summary: blockedTickets.length > 0
-          ? `${blockedTickets.length} blocked items require immediate attention to prevent timeline delays.`
-          : 'No currently blocked items. Monitor cross-project dependencies.',
+          ? `${blockedTickets.length} items blocked. ${onHoldTickets.length} items on hold require review.`
+          : 'No currently blocked items. Good project flow!',
         details: blockedTickets.length > 0
           ? [
-              ...blockedTickets.slice(0, 3).map(t => `${t.id}: ${t.title.substring(0, 70)} [${t.project}]`),
+              ...blockedTickets.slice(0, 3).map(t => `${t.id}: ${t.title.substring(0, 60)}... [${t.assignee}]`),
               blockedTickets.length > 3 ? `...and ${blockedTickets.length - 3} more blocked items` : '',
-              'Unblock these items to maintain velocity'
+              onHoldTickets.length > 0 ? `${onHoldTickets.length} items on hold - review priorities` : 'No items on hold'
             ].filter(Boolean)
           : [
-              'No blocked items - good project flow',
-              `Security items (${securityCount}) may have compliance dependencies`,
-              `${stats.byProject?.['Byte LOS'] || 0} Byte LOS + ${stats.byProject?.BYTE || 0} BYTE + ${stats.byProject?.['Product Masters'] || 0} Product Masters items require cross-team coordination`,
-              'Monitor for emerging dependencies'
+              'No blocked items - excellent project health',
+              `${onHoldTickets.length} items on hold may need review`,
+              `${inQATickets.length} items in QA testing`,
+              `${inDevTickets.length} items in active development`
             ],
         recommendation: blockedTickets.length > 0
-          ? `URGENT: Unblock ${blockedTickets.length} item(s) immediately. Create dependency graph and identify critical path. Schedule blocker resolution meeting.`
-          : 'Maintain clear communication across projects. Proactively identify and document dependencies before they become blockers.'
+          ? `URGENT: Review ${blockedTickets.length} blocked items. Schedule blocker resolution meeting. Identify owners and next steps for each.`
+          : onHoldTickets.length > 5
+          ? `Review ${onHoldTickets.length} on-hold items to determine if they should be resumed or deprioritized.`
+          : 'Continue monitoring. Proactively identify dependencies before they become blockers.'
       }
     },
     {
       id: 4,
-      question: 'How is our security posture evolving?',
-      icon: '🔒',
+      question: 'What is our development pipeline status?',
+      icon: '🔄',
       color: 'border-purple-500',
       answer: {
-        summary: `${securityCount} security-focused initiatives in progress, representing ${Math.round((securityCount / stats.total) * 100)}% of active backlog.`,
-        details: securityCount > 0
-          ? [
-              `${securityCount} security items across all projects`,
-              `${tickets.filter(t => t.category === 'Security' && t.status === 'In Progress').length} actively being worked`,
-              `${tickets.filter(t => t.category === 'Security' && (t.priority === 'Critical' || t.priority === 'High')).length} high-priority security items`,
-              'Permissions, access controls, and compliance work in flight'
-            ]
-          : [
-              'Limited security-specific work items',
-              'Consider security audit and compliance review',
-              'Ensure security best practices in all development',
-              'Schedule security planning session'
-            ],
-        recommendation: securityCount > 10
-          ? 'Strong security focus. Ensure items complete before next audit cycle. Consider dedicated security team capacity.'
-          : securityCount > 5
-          ? 'Moderate security focus. Monitor progress and ensure timely completion of compliance items.'
-          : 'Low security focus. Recommend security posture review and identify any missing compliance work.'
+        summary: `Pipeline: ${bsaInProgressTickets.length} in BSA → ${inDevTickets.length} in Dev → ${inQATickets.length} in QA → ${readyForReviewTickets.length} Ready for Release`,
+        details: [
+          `${bsaInProgressTickets.length} items being analyzed (BSA in Progress)`,
+          `${inDevTickets.length} items in active development`,
+          `${inQATickets.length} items in QA testing`,
+          `${readyForReviewTickets.length} items ready for release`,
+          `${newTickets.length} items in backlog queue`
+        ],
+        recommendation: inQATickets.length > inDevTickets.length
+          ? 'QA queue is building. Ensure QA resources can handle volume. Consider prioritizing QA to move items to release.'
+          : inDevTickets.length > 5
+          ? `${inDevTickets.length} items in development. Ensure clear priorities and avoid context switching.`
+          : 'Pipeline looks healthy. Continue current cadence.'
       }
     },
     {
       id: 5,
-      question: 'What technical debt should we address vs defer?',
-      icon: '⚖️',
+      question: 'What can we release in the next Wednesday deployment?',
+      icon: '🚀',
       color: 'border-teal-500',
       answer: {
-        summary: `Balancing ${stats.byCategory.Infrastructure || 0} infrastructure items with ${stats.byCategory.Feature || 0} feature requests and ${stats.byCategory['Bug Fix'] || 0} bug fixes.`,
-        details: [
-          `MUST DO: ${overdueTickets.length} overdue items need immediate attention`,
-          `MUST DO: ${securityCount} security/compliance items`,
-          `SHOULD DO: ${stats.byCategory.Infrastructure || 0} infrastructure improvements`,
-          `CAN DEFER: ${stats.byCategory.Documentation || 0} documentation updates without immediate impact`
-        ],
-        recommendation: overdueTickets.length > 5
-          ? 'Focus on clearing overdue backlog first. Defer non-critical infrastructure work to next sprint.'
-          : 'Balanced approach: Address must-do security/compliance, improve infrastructure, defer low-impact documentation to future sprints.'
+        summary: `${readyForReviewTickets.length} items ready for release, plus ${inQATickets.length} in QA that could complete by Wednesday.`,
+        details: readyForReviewTickets.length > 0
+          ? [
+              ...readyForReviewTickets.slice(0, 4).map(t =>
+                `${t.id}: ${t.title.substring(0, 55)}... [${t.state}]`
+              ),
+              readyForReviewTickets.length > 4 ? `...and ${readyForReviewTickets.length - 4} more ready items` : ''
+            ].filter(Boolean)
+          : [
+              'No items currently marked ready for release',
+              `${inQATickets.length} items in QA could be ready soon`,
+              'Focus on completing QA for candidate items',
+              'Review prioritized backlog for quick wins'
+            ],
+        recommendation: readyForReviewTickets.length >= 5
+          ? `Strong release candidate pool (${readyForReviewTickets.length} items). Prepare release notes and coordinate with stakeholders.`
+          : readyForReviewTickets.length > 0
+          ? `${readyForReviewTickets.length} items ready. Consider accelerating ${inQATickets.length} QA items to increase release scope.`
+          : 'Focus on completing in-flight items. Prioritize QA completion for next release cycle.'
       }
     },
     {
       id: 6,
-      question: 'What wins can we demonstrate to leadership?',
+      question: 'How can we demonstrate progress to leadership?',
       icon: '🎯',
       color: 'border-emerald-500',
       answer: {
-        summary: `${stats.total} active initiatives across ${Object.keys(stats.byProject || {}).length} projects with ${stats.byCategory.Feature || 0} new features in progress.`,
+        summary: `${stats.total} active backlog items with ${readyForReviewTickets.length} ready for release. Team velocity: ${inProgressTickets.length} items in active work.`,
         details: [
-          `${securityCount} security improvements enhancing compliance posture`,
-          `${stats.byCategory.Performance || 0} performance optimizations in flight`,
-          `${stats.byCategory.Feature || 0} new features delivering business value`,
-          `${stats.byStatus['Ready for Review'] || 0} items ready for review/deployment`,
-          `Active work across ${uniqueAssignees} team members showing broad engagement`
+          `${readyForReviewTickets.length} items completed and ready for deployment`,
+          `${inProgressTickets.length} items actively being worked (${inDevTickets.length} dev, ${inQATickets.length} QA)`,
+          `${highPriorityCount} high-priority items being addressed`,
+          `${uniqueAssignees} team members actively contributing`,
+          `Wednesday releases maintaining consistent delivery cadence`
         ],
-        recommendation: stats.byStatus['Ready for Review'] > 0
-          ? `Prepare executive summary highlighting: ${securityCount} security enhancements, ${stats.byCategory.Feature} features, and ${stats.byStatus['Ready for Review']} items ready to deploy. Schedule demo for completed work.`
-          : 'As items complete, document quantifiable improvements (performance gains, security enhancements, user impact). Schedule regular demos to showcase progress.'
+        recommendation: readyForReviewTickets.length > 0
+          ? `Prepare executive summary highlighting ${readyForReviewTickets.length} items ready for release. Include impact statements and stakeholder benefits.`
+          : 'Track completion velocity. Document in-progress work and expected completion dates. Schedule demos for near-complete items.'
       }
     }
   ];
@@ -190,8 +188,8 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
   // Calculate risk level
   const getRiskLevel = () => {
     const riskScore =
-      (overdueTickets.length * 3) +
-      (blockedTickets.length * 2) +
+      (blockedTickets.length * 3) +
+      (onHoldTickets.length * 1) +
       (highPriorityCount * 1);
 
     if (riskScore > 20) return { level: 'High', color: 'text-rose-400' };
@@ -204,7 +202,7 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
 
   // Calculate velocity metric
   const getVelocityStatus = () => {
-    const inProgress = stats.byStatus['In Progress'] || 0;
+    const inProgress = inProgressTickets.length;
     const blocked = blockedTickets.length;
     const ratio = blocked > 0 ? inProgress / blocked : inProgress;
 
@@ -261,7 +259,7 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
                   {/* Recommendation */}
                   <div className="p-4 bg-gradient-to-r from-blue-500/10 to-teal-500/10 rounded-lg border border-blue-500/30">
                     <h4 className="text-sm font-semibold text-blue-400 uppercase tracking-wide mb-2">
-                      💡 Recommendation
+                      Recommendation
                     </h4>
                     <p className="text-sm text-gray-300">{item.answer.recommendation}</p>
                   </div>
@@ -283,7 +281,7 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
             <div>
               <div className={`text-2xl font-bold ${riskLevel.color}`}>{riskLevel.level}</div>
               <div className="text-xs text-gray-500">
-                {overdueTickets.length} overdue, {blockedTickets.length} blocked
+                {blockedTickets.length} blocked, {onHoldTickets.length} on hold
               </div>
             </div>
           </div>
@@ -298,7 +296,7 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
             <div>
               <div className={`text-2xl font-bold ${velocity.color}`}>{velocity.status}</div>
               <div className="text-xs text-gray-500">
-                {stats.byStatus['In Progress'] || 0} in progress, {stats.byStatus['Ready for Review'] || 0} ready
+                {inProgressTickets.length} in progress, {readyForReviewTickets.length} ready
               </div>
             </div>
           </div>
@@ -306,20 +304,16 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
 
         <div className="card">
           <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
-            Priority Focus
+            Release Pipeline
           </h4>
           <div className="flex items-center gap-3">
-            <div className="text-3xl">🎯</div>
+            <div className="text-3xl">🚀</div>
             <div>
               <div className="text-2xl font-bold text-teal-400">
-                {Object.keys(stats.byCategory || {}).sort((a, b) => {
-                  const categoryA = a as keyof typeof stats.byCategory;
-                  const categoryB = b as keyof typeof stats.byCategory;
-                  return (stats.byCategory[categoryB] || 0) - (stats.byCategory[categoryA] || 0);
-                })[0] || 'Balanced'}
+                {readyForReviewTickets.length} Ready
               </div>
               <div className="text-xs text-gray-500">
-                {stats.byCategory.Security || 0} security, {stats.byCategory.Feature || 0} features
+                {inQATickets.length} in QA, {inDevTickets.length} in dev
               </div>
             </div>
           </div>
