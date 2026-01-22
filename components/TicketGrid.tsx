@@ -1,38 +1,145 @@
 'use client';
 
 import { type Ticket, type Priority, type Status } from '@/lib/data-client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { TicketLink } from './TicketLink';
 
 interface TicketGridProps {
   tickets: Ticket[];
 }
 
+// Multi-select dropdown component
+interface MultiSelectProps {
+  label: string;
+  options: string[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  placeholder?: string;
+}
+
+function MultiSelect({ label, options, selected, onChange, placeholder = 'All' }: MultiSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleOption = (option: string) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter(s => s !== option));
+    } else {
+      onChange([...selected, option]);
+    }
+  };
+
+  const clearAll = () => {
+    onChange([]);
+  };
+
+  const selectAll = () => {
+    onChange([...options]);
+  };
+
+  const displayText = selected.length === 0
+    ? placeholder
+    : selected.length === 1
+    ? selected[0]
+    : `${selected.length} selected`;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="block text-sm font-medium text-gray-400 mb-2">{label}</label>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white text-left flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <span className={selected.length === 0 ? 'text-gray-500' : 'text-white'}>
+          {displayText}
+        </span>
+        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          {/* Quick actions */}
+          <div className="flex gap-2 p-2 border-b border-gray-700">
+            <button
+              type="button"
+              onClick={selectAll}
+              className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-colors"
+            >
+              Select All
+            </button>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="text-xs px-2 py-1 bg-gray-500/20 text-gray-400 rounded hover:bg-gray-500/30 transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+
+          {/* Options */}
+          <div className="p-2 space-y-1">
+            {options.map(option => (
+              <label
+                key={option}
+                className="flex items-center gap-3 px-2 py-2 rounded cursor-pointer hover:bg-gray-700/50 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.includes(option)}
+                  onChange={() => toggleOption(option)}
+                  className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+                />
+                <span className="text-sm text-gray-200">{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TicketGrid({ tickets: initialTickets }: TicketGridProps) {
   const tickets = initialTickets;
   const [sortField, setSortField] = useState<keyof Ticket | 'sme'>('priority');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [filterPriority, setFilterPriority] = useState<Priority | 'All'>('All');
-  const [filterStatus, setFilterStatus] = useState<Status | 'All'>('All');
-  const [filterAssignee, setFilterAssignee] = useState<string>('All');
+  const [filterPriorities, setFilterPriorities] = useState<string[]>([]);
+  const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
+  const [filterAssignees, setFilterAssignees] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Get unique assignees
-  const assignees = useMemo(() => {
-    const unique = [...new Set(tickets.map(t => t.assignee).filter(Boolean))].sort();
-    return ['All', ...unique];
+  // Get unique values for filters
+  const assigneeOptions = useMemo(() => {
+    return [...new Set(tickets.map(t => t.assignee).filter(Boolean))].sort();
   }, [tickets]);
 
-  // SME mapping - For this context, SME (Subject Matter Expert) is the assigned developer
+  const priorityOptions: Priority[] = ['Critical', 'High', 'Medium', 'Low'];
+  const statusOptions: Status[] = ['New', 'In Progress', 'Blocked', 'Ready for Review', 'Completed'];
+
+  // SME mapping
   const getSME = (ticket: Ticket): string => {
     return ticket.assignee || 'Unassigned';
   };
 
   // Filter tickets
   let filteredTickets = tickets.filter(ticket => {
-    const matchesPriority = filterPriority === 'All' || ticket.priority === filterPriority;
-    const matchesStatus = filterStatus === 'All' || ticket.status === filterStatus;
-    const matchesAssignee = filterAssignee === 'All' || ticket.assignee === filterAssignee;
+    const matchesPriority = filterPriorities.length === 0 || filterPriorities.includes(ticket.priority);
+    const matchesStatus = filterStatuses.length === 0 || filterStatuses.includes(ticket.status);
+    const matchesAssignee = filterAssignees.length === 0 || filterAssignees.includes(ticket.assignee);
     const matchesSearch = searchTerm === '' ||
       ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,7 +152,6 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
 
   // Sort tickets
   filteredTickets = [...filteredTickets].sort((a, b) => {
-    // Special handling for priority - use custom order
     if (sortField === 'priority') {
       const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
       const aIdx = priorityOrder.indexOf(a.priority);
@@ -88,11 +194,34 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
     }
   };
 
+  // Count active filters
+  const activeFilterCount = filterPriorities.length + filterStatuses.length + filterAssignees.length;
+
+  const clearAllFilters = () => {
+    setFilterPriorities([]);
+    setFilterStatuses([]);
+    setFilterAssignees([]);
+    setSearchTerm('');
+  };
+
   return (
     <div className="space-y-6">
       {/* Filters */}
       <div className="card">
-        <h2 className="text-2xl font-bold mb-6">Ticket Grid</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Ticket Grid</h2>
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearAllFilters}
+              className="text-sm px-3 py-1 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+            >
+              <span>Clear all filters</span>
+              <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                {activeFilterCount}
+              </span>
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
@@ -107,53 +236,57 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
             />
           </div>
 
-          {/* Assignee Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Assignee</label>
-            <select
-              value={filterAssignee}
-              onChange={(e) => setFilterAssignee(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {assignees.map(assignee => (
-                <option key={assignee} value={assignee}>{assignee}</option>
-              ))}
-            </select>
-          </div>
+          {/* Assignee Filter - Multi-select */}
+          <MultiSelect
+            label="Assignee"
+            options={assigneeOptions}
+            selected={filterAssignees}
+            onChange={setFilterAssignees}
+            placeholder="All Assignees"
+          />
 
-          {/* Priority Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Priority</label>
-            <select
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value as Priority | 'All')}
-              className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="All">All Priorities</option>
-              <option value="Critical">Critical</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
-          </div>
+          {/* Priority Filter - Multi-select */}
+          <MultiSelect
+            label="Priority"
+            options={priorityOptions}
+            selected={filterPriorities}
+            onChange={setFilterPriorities}
+            placeholder="All Priorities"
+          />
 
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Status</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as Status | 'All')}
-              className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="All">All Statuses</option>
-              <option value="New">New</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Blocked">Blocked</option>
-              <option value="Ready for Review">Ready for Review</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
+          {/* Status Filter - Multi-select */}
+          <MultiSelect
+            label="Status"
+            options={statusOptions}
+            selected={filterStatuses}
+            onChange={setFilterStatuses}
+            placeholder="All Statuses"
+          />
         </div>
+
+        {/* Active Filters Display */}
+        {activeFilterCount > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {filterPriorities.map(p => (
+              <span key={p} className="inline-flex items-center gap-1 px-2 py-1 bg-rose-500/20 text-rose-400 text-xs rounded-full">
+                {p}
+                <button onClick={() => setFilterPriorities(filterPriorities.filter(x => x !== p))} className="hover:text-white">×</button>
+              </span>
+            ))}
+            {filterStatuses.map(s => (
+              <span key={s} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">
+                {s}
+                <button onClick={() => setFilterStatuses(filterStatuses.filter(x => x !== s))} className="hover:text-white">×</button>
+              </span>
+            ))}
+            {filterAssignees.map(a => (
+              <span key={a} className="inline-flex items-center gap-1 px-2 py-1 bg-teal-500/20 text-teal-400 text-xs rounded-full">
+                {a}
+                <button onClick={() => setFilterAssignees(filterAssignees.filter(x => x !== a))} className="hover:text-white">×</button>
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Results Count */}
         <div className="mt-4 text-sm text-gray-400">
