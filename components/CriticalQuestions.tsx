@@ -1,6 +1,7 @@
 'use client';
 
 import { type Ticket, type TicketStats } from '@/lib/data-client';
+import { TicketLink } from './TicketLink';
 
 interface CriticalQuestionsProps {
   tickets: Ticket[];

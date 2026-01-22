@@ -2,6 +2,7 @@
 
 import { type Ticket, type Priority, type Status } from '@/lib/data-client';
 import { useState, useMemo } from 'react';
+import { TicketLink } from './TicketLink';
 
 interface TicketGridProps {
   tickets: Ticket[];
@@ -246,7 +247,7 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
                 className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors"
               >
                 <td className="py-4 px-4">
-                  <span className="font-mono text-sm text-gray-400">{ticket.id}</span>
+                  <TicketLink ticketId={ticket.id} className="font-mono text-sm" />
                 </td>
                 <td className="py-4 px-4">
                   <div className="max-w-md">

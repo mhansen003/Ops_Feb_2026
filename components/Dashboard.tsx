@@ -2,6 +2,7 @@
 
 import { type Ticket, type TicketStats } from '@/lib/data-client';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { TicketLink } from './TicketLink';
 
 interface DashboardProps {
   tickets: Ticket[];
@@ -162,7 +163,7 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-mono text-gray-400">{ticket.id}</span>
+                      <TicketLink ticketId={ticket.id} className="text-sm font-mono" showIcon />
                       <span className={`badge ${
                         ticket.priority === 'Critical' ? 'badge-critical' : 'badge-high'
                       }`}>
