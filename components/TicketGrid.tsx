@@ -115,7 +115,7 @@ function MultiSelect({ label, options, selected, onChange, placeholder = 'All' }
 
 export default function TicketGrid({ tickets: initialTickets }: TicketGridProps) {
   const tickets = initialTickets;
-  const [sortField, setSortField] = useState<keyof Ticket | 'sme'>('priority');
+  const [sortField, setSortField] = useState<keyof Ticket | 'sme' | 'stackRank'>('stackRank');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [filterPriorities, setFilterPriorities] = useState<string[]>([]);
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
@@ -150,8 +150,32 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
     return matchesPriority && matchesStatus && matchesAssignee && matchesSearch;
   });
 
+  // Helper to get numeric rank for sorting
+  const getNumericRank = (ticket: Ticket): number => {
+    const rank = ticket.priorityRankWithinTier;
+    if (!rank || rank === 'Unranked') return 999; // Unranked goes last
+    const num = parseInt(rank, 10);
+    return isNaN(num) ? 999 : num;
+  };
+
   // Sort tickets
   filteredTickets = [...filteredTickets].sort((a, b) => {
+    // Stack Rank sort: priority first, then rank within tier
+    if (sortField === 'stackRank') {
+      const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
+      const aPriorityIdx = priorityOrder.indexOf(a.priority);
+      const bPriorityIdx = priorityOrder.indexOf(b.priority);
+
+      if (aPriorityIdx !== bPriorityIdx) {
+        return sortDirection === 'asc' ? aPriorityIdx - bPriorityIdx : bPriorityIdx - aPriorityIdx;
+      }
+
+      // Same priority, sort by rank within tier
+      const aRank = getNumericRank(a);
+      const bRank = getNumericRank(b);
+      return sortDirection === 'asc' ? aRank - bRank : bRank - aRank;
+    }
+
     if (sortField === 'priority') {
       const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
       const aIdx = priorityOrder.indexOf(a.priority);
@@ -175,7 +199,7 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
       : bValue.localeCompare(aValue);
   });
 
-  const handleSort = (field: keyof Ticket | 'sme') => {
+  const handleSort = (field: keyof Ticket | 'sme' | 'stackRank') => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -323,6 +347,17 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
               </th>
               <th className="text-left py-3 px-4">
                 <button
+                  onClick={() => handleSort('stackRank')}
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
+                >
+                  Stack Rank
+                  {sortField === 'stackRank' && (
+                    <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </button>
+              </th>
+              <th className="text-left py-3 px-4">
+                <button
                   onClick={() => handleSort('priority')}
                   className="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white transition-colors"
                 >
@@ -400,6 +435,25 @@ export default function TicketGrid({ tickets: initialTickets }: TicketGridProps)
                       <span className="text-xs text-gray-500">{ticket.workItemType}</span>
                     )}
                   </div>
+                </td>
+                <td className="py-4 px-4">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-bold ${
+                      ticket.priorityRankWithinTier === '0' ? 'text-green-400' :
+                      ticket.priorityRankWithinTier === 'Unranked' ? 'text-gray-500' :
+                      'text-white'
+                    }`}>
+                      {ticket.priorityRankWithinTier || '-'}
+                    </span>
+                    {ticket.priorityRankWithinTier === '0' && (
+                      <span className="text-xs text-green-400" title="Near finish line">🏁</span>
+                    )}
+                  </div>
+                  {ticket.explanation && (
+                    <div className="text-xs text-amber-400/80 mt-1 max-w-[150px] truncate" title={ticket.explanation}>
+                      💬 {ticket.explanation}
+                    </div>
+                  )}
                 </td>
                 <td className="py-4 px-4">
                   <span className={`badge ${getPriorityBadgeClass(ticket.priority)}`}>

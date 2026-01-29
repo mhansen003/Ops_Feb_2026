@@ -7,6 +7,8 @@ export interface Ticket {
   title: string;
   description: string;
   priority: Priority;
+  priorityLevel?: string; // Original level (1-Critical, 2-High, etc.)
+  priorityRankWithinTier?: string; // Rank within the priority tier
   status: Status;
   category: Category;
   assignee: string;
@@ -15,6 +17,7 @@ export interface Ticket {
   workItemType?: string;
   state?: string;
   requestor?: string;
+  explanation?: string; // Lauren/Susan's notes
   aiRecommendation?: string;
 }
 
@@ -53,6 +56,8 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
     title: t.title,
     description: t.description || '',
     priority: t.priority as Priority,
+    priorityLevel: t.priority_level,
+    priorityRankWithinTier: t.priority_rank_within_tier,
     status: t.status as Status,
     category: t.category as Category,
     assignee: t.assignee || 'Unassigned',
@@ -61,6 +66,7 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
     workItemType: t.work_item_type,
     state: t.state,
     requestor: t.requestor,
+    explanation: t.explanation,
     aiRecommendation: t.ai_recommendation,
   }));
 

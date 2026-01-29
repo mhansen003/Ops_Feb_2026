@@ -32,6 +32,8 @@ export async function GET() {
       title: t.title,
       description: t.description,
       priority: t.priority,
+      priority_level: t.priorityLevel,
+      priority_rank_within_tier: t.priorityRankWithinTier,
       status: t.status,
       category: t.category,
       assignee: t.assignee,
@@ -42,6 +44,7 @@ export async function GET() {
       work_item_type: t.workItemType,
       state: t.state,
       requestor: t.requestor,
+      explanation: t.explanation,
       ai_recommendation: t.aiRecommendation,
     }));
 
