@@ -40,10 +40,10 @@ export default function Home() {
   const tabs = [
     { id: 'story' as Tab, label: 'Story', icon: '📖' },
     { id: 'dashboard' as Tab, label: 'Dashboard', icon: '📊' },
-    { id: 'burndown' as Tab, label: 'Burndown', icon: '📉' },
-    { id: 'calendar' as Tab, label: 'Calendar', icon: '📅' },
     { id: 'tickets' as Tab, label: 'Ticket Grid', icon: '🎫' },
+    { id: 'calendar' as Tab, label: 'Calendar', icon: '📅' },
     { id: 'questions' as Tab, label: 'Critical Questions', icon: '❓' },
+    { id: 'burndown' as Tab, label: 'Burndown', icon: '📉' },
   ];
 
   return (

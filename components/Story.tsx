@@ -75,6 +75,13 @@ export default function Story({ tickets, stats }: StoryProps) {
               date="Jan 21, 2026"
               title="Backlog Cleanup Complete"
               description="All board queries exported to Excel for Lauren to stack rank by priority. Clean, prioritized backlog delivered."
+              icon="📤"
+              color="bg-amber-500"
+            />
+            <TimelineItem
+              date="Jan 29, 2026"
+              title="Stack Ranking Delivered"
+              description="Lauren Forconi and Susan Walker delivered the final stack-ranked backlog. Each priority tier ranked internally, items near completion flagged, and potential duplicates identified for tech team review."
               icon="🏆"
               color="bg-green-500"
             />
@@ -114,6 +121,55 @@ export default function Story({ tickets, stats }: StoryProps) {
         />
       </div>
 
+      {/* Stack Ranking Highlights from Lauren */}
+      <div className="card bg-gradient-to-br from-amber-900/20 to-orange-900/20 border border-amber-700/30">
+        <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+          <span className="text-2xl">📋</span>
+          Stack Ranking Highlights
+          <span className="text-sm font-normal text-amber-400 ml-2">from Lauren & Susan's Review</span>
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Ranking Approach */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-white flex items-center gap-2">
+              <span className="text-green-400">✓</span> Ranking Approach
+            </h4>
+            <ul className="text-sm text-gray-300 space-y-2 pl-6">
+              <li>Items ranked <span className="text-green-400 font-semibold">within each priority tier</span> (Critical → High → Medium → Low)</li>
+              <li>Rank <span className="text-green-400 font-semibold">"0"</span> = near finish line, don't deprioritize</li>
+              <li><span className="text-amber-400">"Unranked"</span> = needs clarification or wrapped into other items</li>
+              <li className="italic text-gray-400">"Not deathly attached to strict order—happy to wiggle things around as it makes sense"</li>
+            </ul>
+          </div>
+
+          {/* Key Call-outs */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-white flex items-center gap-2">
+              <span className="text-amber-400">⚡</span> Key Call-outs
+            </h4>
+            <ul className="text-sm text-gray-300 space-y-2 pl-6">
+              <li><span className="text-blue-400">#73860</span> - "Didn't we do this already?" - verify before starting</li>
+              <li><span className="text-blue-400">#76214</span> & <span className="text-blue-400">#78114</span> - potential duplicates of other tickets</li>
+              <li><span className="text-blue-400">#87757</span> - Lereta flood integration: Susan recommends <span className="text-red-400">not proceeding</span></li>
+              <li><span className="text-blue-400">#92240, #92908</span> - consider combining with <span className="text-blue-400">#60402</span> (AIO refresh)</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Items Removed */}
+        <div className="mt-6 pt-4 border-t border-amber-700/30">
+          <h4 className="font-semibold text-white flex items-center gap-2 mb-3">
+            <span className="text-green-400">✅</span> Completed & Removed (3 items)
+          </h4>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">#91364 - First Payment Letter (per Kelly)</span>
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">#92360 - Credit Verifications Bundle (Released)</span>
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">#93001 - AIO Hardstops (per ADO)</span>
+          </div>
+        </div>
+      </div>
+
       {/* Team Recognition */}
       <div className="card">
         <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
@@ -125,7 +181,7 @@ export default function Story({ tickets, stats }: StoryProps) {
           <TeamMember name="Ericka Anaya" role="Director of Product" emoji="👩‍💼" />
           <TeamMember name="Lauren Forconi" role="Stack Ranking Lead" emoji="📊" />
           <TeamMember name="Kelly Mattox" role="Coordination Lead" emoji="🎯" />
-          <TeamMember name="Susan" role="Board Review" emoji="📋" />
+          <TeamMember name="Susan Walker" role="Stack Ranking" emoji="📋" />
           <TeamMember name="Renee Perrault" role="Team Lead" emoji="👩‍💻" />
           <TeamMember name="Andrew" role="Developer" emoji="⚙️" />
           <TeamMember name="Robert" role="Developer" emoji="🔧" />
