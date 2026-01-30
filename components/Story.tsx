@@ -81,9 +81,16 @@ export default function Story({ tickets, stats }: StoryProps) {
             <TimelineItem
               date="Jan 29, 2026"
               title="Stack Ranking Delivered"
-              description="Lauren Forconi and Susan Walker delivered the final stack-ranked backlog. Each priority tier ranked internally, items near completion flagged, and potential duplicates identified for tech team review."
-              icon="🏆"
+              description="Lauren Forconi and Susan Walker delivered the initial stack-ranked backlog. Each priority tier ranked internally, items near completion flagged, and potential duplicates identified for tech team review."
+              icon="📊"
               color="bg-green-500"
+            />
+            <TimelineItem
+              date="Jan 30, 2026"
+              title="Final List Confirmed"
+              description="Lauren and Kelly Mattox reviewed and finalized the list, clearing off several closed or released tickets. The result: a clean, ordered list of 57 items ranked 1-57, ready for Ops Summit presentation."
+              icon="🏆"
+              color="bg-amber-500"
             />
           </div>
         </div>
@@ -136,9 +143,9 @@ export default function Story({ tickets, stats }: StoryProps) {
               <span className="text-green-400">✓</span> Ranking Approach
             </h4>
             <ul className="text-sm text-gray-300 space-y-2 pl-6">
-              <li>Items ranked <span className="text-green-400 font-semibold">within each priority tier</span> (Critical → High → Medium → Low)</li>
-              <li>Rank <span className="text-green-400 font-semibold">"0"</span> = near finish line, don't deprioritize</li>
-              <li><span className="text-amber-400">"Unranked"</span> = needs clarification or wrapped into other items</li>
+              <li>Items ordered <span className="text-green-400 font-semibold">1-57</span> across priority tiers (High → Medium → Low → Lowest)</li>
+              <li>Lauren & Kelly reviewed and <span className="text-green-400 font-semibold">cleared off completed/released items</span></li>
+              <li>Column H ("More Details") provides helpful context per Lauren's approval</li>
               <li className="italic text-gray-400">"Not deathly attached to strict order—happy to wiggle things around as it makes sense"</li>
             </ul>
           </div>
@@ -149,10 +156,10 @@ export default function Story({ tickets, stats }: StoryProps) {
               <span className="text-amber-400">⚡</span> Key Call-outs
             </h4>
             <ul className="text-sm text-gray-300 space-y-2 pl-6">
-              <li><span className="text-blue-400">#73860</span> - "Didn't we do this already?" - verify before starting</li>
-              <li><span className="text-blue-400">#76214</span> & <span className="text-blue-400">#78114</span> - potential duplicates of other tickets</li>
-              <li><span className="text-blue-400">#87757</span> - Lereta flood integration: Susan recommends <span className="text-red-400">not proceeding</span></li>
-              <li><span className="text-blue-400">#92240, #92908</span> - consider combining with <span className="text-blue-400">#60402</span> (AIO refresh)</li>
+              <li><span className="text-blue-400">#92486</span> - Stack Rank #1: ComplianceEase password reset required by <span className="text-red-400">2/10/26</span></li>
+              <li><span className="text-blue-400">#90979</span> - Stack Rank #2: PTR Condition Stage Hard stop — waiting for Ops green light</li>
+              <li><span className="text-blue-400">#73860</span> - Stack Rank #3: Part of Conditions Screen Relabelling Project</li>
+              <li>17 High priority items, 30 Medium, 9 Low, 1 Lowest</li>
             </ul>
           </div>
         </div>
@@ -160,12 +167,12 @@ export default function Story({ tickets, stats }: StoryProps) {
         {/* Items Removed */}
         <div className="mt-6 pt-4 border-t border-amber-700/30">
           <h4 className="font-semibold text-white flex items-center gap-2 mb-3">
-            <span className="text-green-400">✅</span> Completed & Removed (3 items)
+            <span className="text-green-400">✅</span> Cleaned from Previous List
           </h4>
           <div className="flex flex-wrap gap-3 text-sm">
-            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">#91364 - First Payment Letter (per Kelly)</span>
-            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">#92360 - Credit Verifications Bundle (Released)</span>
-            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">#93001 - AIO Hardstops (per ADO)</span>
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">Closed tickets removed</span>
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">Released items cleared</span>
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full">List reduced from 74 → 57 items</span>
           </div>
         </div>
       </div>

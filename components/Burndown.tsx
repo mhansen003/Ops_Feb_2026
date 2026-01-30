@@ -26,14 +26,12 @@ interface BurndownProps {
 
 // Estimate work points by priority
 const PRIORITY_POINTS: Record<string, number> = {
-  Critical: 8,
   High: 5,
   Medium: 3,
   Low: 1,
 };
 
 const PRIORITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  Critical: { bg: 'bg-rose-500/20', text: 'text-rose-400', border: 'border-rose-500/50' },
   High: { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/50' },
   Medium: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/50' },
   Low: { bg: 'bg-teal-500/20', text: 'text-teal-400', border: 'border-teal-500/50' },
@@ -59,8 +57,8 @@ export default function Burndown({ tickets, stats }: BurndownProps) {
       filtered = filtered.filter(t => priorityFilter.includes(t.priority));
     }
 
-    // Sort by priority weight (Critical first)
-    const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
+    // Sort by priority weight (High first)
+    const priorityOrder = ['High', 'Medium', 'Low'];
     return filtered.sort((a, b) => {
       const aIdx = priorityOrder.indexOf(a.priority);
       const bIdx = priorityOrder.indexOf(b.priority);
@@ -143,12 +141,11 @@ export default function Burndown({ tickets, stats }: BurndownProps) {
 
   // Priority distribution for chart
   const priorityChartData = useMemo(() => {
-    return ['Critical', 'High', 'Medium', 'Low'].map(priority => ({
+    return ['High', 'Medium', 'Low'].map(priority => ({
       name: priority,
       count: workStats.byPriority[priority]?.count || 0,
       points: workStats.byPriority[priority]?.points || 0,
-      color: priority === 'Critical' ? '#f43f5e' :
-             priority === 'High' ? '#f59e0b' :
+      color: priority === 'High' ? '#f59e0b' :
              priority === 'Medium' ? '#3b82f6' : '#14b8a6',
     }));
   }, [workStats]);
@@ -251,7 +248,7 @@ export default function Burndown({ tickets, stats }: BurndownProps) {
 
       {/* Priority Breakdown - Clickable Filters */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {['Critical', 'High', 'Medium', 'Low'].map(priority => {
+        {['High', 'Medium', 'Low'].map(priority => {
           const data = workStats.byPriority[priority] || { count: 0, points: 0 };
           const colors = PRIORITY_COLORS[priority];
           const isFiltered = priorityFilter.includes(priority);

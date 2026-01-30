@@ -83,7 +83,6 @@ export default function Calendar({ tickets }: CalendarProps) {
   // Get color based on priority
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'Critical': return { bg: 'bg-rose-500/20', border: 'border-rose-500/50', text: 'text-rose-400', dot: 'bg-rose-500' };
       case 'High': return { bg: 'bg-amber-500/20', border: 'border-amber-500/50', text: 'text-amber-400', dot: 'bg-amber-500' };
       case 'Medium': return { bg: 'bg-blue-500/20', border: 'border-blue-500/50', text: 'text-blue-400', dot: 'bg-blue-500' };
       case 'Low': return { bg: 'bg-teal-500/20', border: 'border-teal-500/50', text: 'text-teal-400', dot: 'bg-teal-500' };
@@ -242,10 +241,6 @@ export default function Calendar({ tickets }: CalendarProps) {
         <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">Priority Color Legend</h4>
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-            <span className="text-sm text-gray-300">Critical</span>
-          </div>
-          <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-amber-500"></div>
             <span className="text-sm text-gray-300">High</span>
           </div>
@@ -279,7 +274,7 @@ export default function Calendar({ tickets }: CalendarProps) {
 
           // Sort by priority
           const sortedTickets = [...sprintTickets].sort((a, b) => {
-            const priorityOrder = ['Critical', 'High', 'Medium', 'Low'];
+            const priorityOrder = ['High', 'Medium', 'Low'];
             return priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
           });
 

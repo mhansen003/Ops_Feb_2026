@@ -1,4 +1,4 @@
-export type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
+export type Priority = 'High' | 'Medium' | 'Low';
 export type Status = 'New' | 'In Progress' | 'Blocked' | 'Ready for Review' | 'Completed';
 export type Category = 'Infrastructure' | 'Security' | 'Performance' | 'Feature' | 'Bug Fix' | 'Documentation';
 
@@ -7,8 +7,8 @@ export interface Ticket {
   title: string;
   description: string;
   priority: Priority;
-  priorityLevel?: string; // Original level (1-Critical, 2-High, etc.)
-  priorityRankWithinTier?: string; // Rank within the priority tier
+  priorityLevel?: string; // Original level (2-High, 3-Medium, etc.)
+  stackRank?: number; // Overall stack rank 1-57
   status: Status;
   category: Category;
   assignee: string;
@@ -17,14 +17,12 @@ export interface Ticket {
   workItemType?: string;
   state?: string;
   requestor?: string;
-  explanation?: string; // Lauren/Susan's notes
-  aiRecommendation?: string;
+  explanation?: string; // Lauren/Kelly's notes (Column H)
 }
 
 export interface TicketStats {
   total: number;
   byPriority: {
-    Critical: number;
     High: number;
     Medium: number;
     Low: number;
@@ -57,7 +55,7 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
     description: t.description || '',
     priority: t.priority as Priority,
     priorityLevel: t.priority_level,
-    priorityRankWithinTier: t.priority_rank_within_tier,
+    stackRank: t.stack_rank,
     status: t.status as Status,
     category: t.category as Category,
     assignee: t.assignee || 'Unassigned',
@@ -67,7 +65,6 @@ export async function fetchTickets(): Promise<{ tickets: Ticket[]; stats: Ticket
     state: t.state,
     requestor: t.requestor,
     explanation: t.explanation,
-    aiRecommendation: t.ai_recommendation,
   }));
 
   // Use stats from API (already calculated server-side)

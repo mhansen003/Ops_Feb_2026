@@ -59,7 +59,7 @@ export default function Home() {
                   Byte Backlog
                 </h1>
                 <p className="text-sm text-gray-400">
-                  Stack Ranked - January 2026
+                  Stack Ranked - January 30, 2026 (Final)
                   {stats && <span className="ml-2">({stats.total} tickets)</span>}
                 </p>
               </div>

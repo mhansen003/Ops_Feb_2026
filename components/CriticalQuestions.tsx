@@ -9,9 +9,9 @@ interface CriticalQuestionsProps {
 }
 
 export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsProps) {
-  // High priority items (Critical + High)
-  const highPriorityCount = (stats.byPriority.Critical || 0) + (stats.byPriority.High || 0);
-  const highPriorityTickets = tickets.filter(t => t.priority === 'Critical' || t.priority === 'High');
+  // High priority items
+  const highPriorityCount = stats.byPriority.High || 0;
+  const highPriorityTickets = tickets.filter(t => t.priority === 'High');
 
   // Workload by assignee
   const assigneeWorkload = stats.byAssignee || {};
@@ -48,8 +48,8 @@ export default function CriticalQuestions({ tickets, stats }: CriticalQuestionsP
       color: 'border-rose-500',
       answer: {
         summary: highPriorityCount > 0
-          ? `We have ${highPriorityCount} high-priority items (${stats.byPriority.Critical} Critical, ${stats.byPriority.High} High) requiring attention.`
-          : 'No critical or high priority items currently flagged.',
+          ? `We have ${highPriorityCount} high-priority items requiring attention (Stack Rank #1-17).`
+          : 'No high priority items currently flagged.',
         details: highPriorityTickets.length > 0
           ? [
               ...highPriorityTickets.slice(0, 4).map(t =>

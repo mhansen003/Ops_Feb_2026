@@ -7,7 +7,6 @@ export async function GET() {
     const stats = {
       total: backlogTickets.length,
       byPriority: {
-        Critical: backlogTickets.filter(t => t.priority === 'Critical').length,
         High: backlogTickets.filter(t => t.priority === 'High').length,
         Medium: backlogTickets.filter(t => t.priority === 'Medium').length,
         Low: backlogTickets.filter(t => t.priority === 'Low').length,
@@ -33,19 +32,18 @@ export async function GET() {
       description: t.description,
       priority: t.priority,
       priority_level: t.priorityLevel,
-      priority_rank_within_tier: t.priorityRankWithinTier,
+      stack_rank: t.stackRank,
       status: t.status,
       category: t.category,
       assignee: t.assignee,
       created_date: t.createdDate,
-      target_date: t.createdDate, // Using created date as placeholder
+      target_date: t.createdDate,
       estimated_effort: '',
       tags: t.tags,
       work_item_type: t.workItemType,
       state: t.state,
       requestor: t.requestor,
       explanation: t.explanation,
-      ai_recommendation: t.aiRecommendation,
     }));
 
     return NextResponse.json({

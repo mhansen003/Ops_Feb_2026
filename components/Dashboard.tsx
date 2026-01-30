@@ -12,7 +12,6 @@ interface DashboardProps {
 export default function Dashboard({ tickets, stats }: DashboardProps) {
 
   const priorityData = [
-    { name: 'Critical', value: stats.byPriority.Critical, color: '#f43f5e' },
     { name: 'High', value: stats.byPriority.High, color: '#f59e0b' },
     { name: 'Medium', value: stats.byPriority.Medium, color: '#3b82f6' },
     { name: 'Low', value: stats.byPriority.Low, color: '#14b8a6' },
@@ -40,8 +39,8 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
           gradient="from-blue-500 to-teal-500"
         />
         <MetricCard
-          title="Critical Priority"
-          value={stats.byPriority.Critical}
+          title="High Priority"
+          value={stats.byPriority.High}
           icon="🔴"
           gradient="from-rose-500 to-pink-500"
         />
@@ -155,15 +154,11 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
 
       {/* High Priority Items */}
       <div className="card">
-        <h3 className="text-xl font-semibold mb-4">Critical & High Priority Items</h3>
+        <h3 className="text-xl font-semibold mb-4">High Priority Items (Top 17)</h3>
         <div className="space-y-3 max-h-[600px] overflow-y-auto">
           {tickets
-            .filter(t => t.priority === 'Critical' || t.priority === 'High')
-            .sort((a, b) => {
-              if (a.priority === 'Critical' && b.priority !== 'Critical') return -1;
-              if (a.priority !== 'Critical' && b.priority === 'Critical') return 1;
-              return 0;
-            })
+            .filter(t => t.priority === 'High')
+            .sort((a, b) => (a.stackRank ?? 999) - (b.stackRank ?? 999))
             .map(ticket => (
               <div
                 key={ticket.id}
@@ -172,10 +167,9 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xs font-bold text-amber-400">#{ticket.stackRank}</span>
                       <TicketLink ticketId={ticket.id} className="text-sm font-mono" showIcon />
-                      <span className={`badge ${
-                        ticket.priority === 'Critical' ? 'badge-critical' : 'badge-high'
-                      }`}>
+                      <span className="badge badge-high">
                         {ticket.priority}
                       </span>
                       <span className="text-xs text-gray-500">{ticket.workItemType}</span>
@@ -186,6 +180,9 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                       <span>📅 Created: {ticket.createdDate}</span>
                       {ticket.state && <span className="text-blue-400">ADO: {ticket.state}</span>}
                     </div>
+                    {ticket.explanation && (
+                      <div className="text-xs text-amber-400/80 mt-1">💬 {ticket.explanation}</div>
+                    )}
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                     ticket.status === 'Blocked' ? 'bg-red-500/20 text-red-400' :
@@ -198,8 +195,8 @@ export default function Dashboard({ tickets, stats }: DashboardProps) {
                 </div>
               </div>
             ))}
-          {tickets.filter(t => t.priority === 'Critical' || t.priority === 'High').length === 0 && (
-            <p className="text-gray-400 text-center py-8">No critical or high priority items</p>
+          {tickets.filter(t => t.priority === 'High').length === 0 && (
+            <p className="text-gray-400 text-center py-8">No high priority items</p>
           )}
         </div>
       </div>
