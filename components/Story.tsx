@@ -146,7 +146,6 @@ export default function Story({ tickets, stats }: StoryProps) {
               <li>Items ordered <span className="text-green-400 font-semibold">1-57</span> across priority tiers (High → Medium → Low → Lowest)</li>
               <li>Lauren & Kelly reviewed and <span className="text-green-400 font-semibold">cleared off completed/released items</span></li>
               <li>Column H ("More Details") provides helpful context per Lauren's approval</li>
-              <li className="italic text-gray-400">"Not deathly attached to strict order—happy to wiggle things around as it makes sense"</li>
             </ul>
           </div>
 
