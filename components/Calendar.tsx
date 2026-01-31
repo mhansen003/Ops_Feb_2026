@@ -43,7 +43,6 @@ export default function Calendar({ tickets }: CalendarProps) {
   const getTicketsByState = (state: string) => tickets.filter(t => t.state === state);
 
   // Specific ADO states for release tracking
-  const tuesdayRelease = getTicketsByState('Tuesday Release');
   const readyToReleaseWithClear = getTicketsByState('Ready to Release with Clear');
   const readyForProd = getTicketsByState('Ready for Prod');
   const inQA = getTicketsByState('In QA');
@@ -145,8 +144,8 @@ export default function Calendar({ tickets }: CalendarProps) {
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold">3-Week Sprint Schedule</h2>
-            <p className="text-gray-400 mt-1">Sprint releases occur every 3 weeks on Wednesday</p>
+            <h2 className="text-2xl font-bold">Calendar</h2>
+            <p className="text-gray-400 mt-1">Release every Wednesday</p>
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold text-green-400">{readyForRelease.length}</div>
@@ -203,13 +202,7 @@ export default function Calendar({ tickets }: CalendarProps) {
       </div>
 
       {/* Release Pipeline Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <PipelineCard
-          title="Tuesday Release"
-          count={tuesdayRelease.length}
-          color="bg-green-500"
-          description="Shipping this release"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <PipelineCard
           title="Ready to Release"
           count={readyToReleaseWithClear.length}
@@ -257,17 +250,6 @@ export default function Calendar({ tickets }: CalendarProps) {
 
       {/* Selected Sprint Details */}
       <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold">
-            Sprint {selectedSprint + 1}: {formatShortDate(getSprintStartDate(sprintEndDates[selectedSprint]))} - {formatDate(sprintEndDates[selectedSprint])}
-          </h3>
-          {selectedSprint === 0 && (
-            <span className="text-xs px-3 py-1 bg-green-500/30 text-green-300 rounded-full">
-              Current Sprint
-            </span>
-          )}
-        </div>
-
         {(() => {
           const sprintTickets = ticketsBySprint[selectedSprint] || [];
           const isCurrentSprint = selectedSprint === 0;
@@ -280,14 +262,6 @@ export default function Calendar({ tickets }: CalendarProps) {
 
           return (
             <>
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-gray-400">
-                  {isCurrentSprint
-                    ? `Items targeted for current sprint release (${sprintTickets.length} tickets):`
-                    : `Projected items for Sprint ${selectedSprint + 1} (${sprintTickets.length} tickets):`}
-                </p>
-              </div>
-
               {sortedTickets.length > 0 ? (
                 <div className="space-y-3 max-h-[500px] overflow-y-auto">
                   {sortedTickets.map(ticket => {
